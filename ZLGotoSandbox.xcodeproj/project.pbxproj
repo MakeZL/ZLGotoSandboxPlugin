@@ -1,0 +1,264 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		48026CC21A58EF9600B97F2D /* ZLGotoSandbox.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZLGotoSandbox.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		48026CC61A58EF9600B97F2D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		48026CCC1A58EFDD00B97F2D /* ZLGotoSandbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLGotoSandbox.h; sourceTree = "<group>"; };
+		48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLGotoSandbox.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		48026CBF1A58EF9600B97F2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		48026CB91A58EF9600B97F2D = {
+			isa = PBXGroup;
+			children = (
+				48026CC41A58EF9600B97F2D /* ZLGotoSandbox */,
+				48026CC31A58EF9600B97F2D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		48026CC31A58EF9600B97F2D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				48026CC21A58EF9600B97F2D /* ZLGotoSandbox.xcplugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		48026CC41A58EF9600B97F2D /* ZLGotoSandbox */ = {
+			isa = PBXGroup;
+			children = (
+				48026CC51A58EF9600B97F2D /* Supporting Files */,
+				48026CCC1A58EFDD00B97F2D /* ZLGotoSandbox.h */,
+				48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */,
+			);
+			path = ZLGotoSandbox;
+			sourceTree = "<group>";
+		};
+		48026CC51A58EF9600B97F2D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				48026CC61A58EF9600B97F2D /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		48026CC11A58EF9600B97F2D /* ZLGotoSandbox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48026CC91A58EF9600B97F2D /* Build configuration list for PBXNativeTarget "ZLGotoSandbox" */;
+			buildPhases = (
+				48026CBE1A58EF9600B97F2D /* Sources */,
+				48026CBF1A58EF9600B97F2D /* Frameworks */,
+				48026CC01A58EF9600B97F2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZLGotoSandbox;
+			productName = ZLGotoSandbox;
+			productReference = 48026CC21A58EF9600B97F2D /* ZLGotoSandbox.xcplugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		48026CBA1A58EF9600B97F2D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = com.zixue101.www;
+				TargetAttributes = {
+					48026CC11A58EF9600B97F2D = {
+						CreatedOnToolsVersion = 6.1;
+					};
+				};
+			};
+			buildConfigurationList = 48026CBD1A58EF9600B97F2D /* Build configuration list for PBXProject "ZLGotoSandbox" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 48026CB91A58EF9600B97F2D;
+			productRefGroup = 48026CC31A58EF9600B97F2D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				48026CC11A58EF9600B97F2D /* ZLGotoSandbox */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		48026CC01A58EF9600B97F2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		48026CBE1A58EF9600B97F2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		48026CC71A58EF9600B97F2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		48026CC81A58EF9600B97F2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		48026CCA1A58EF9600B97F2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "${HOME}";
+				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = NO;
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Debug;
+		};
+		48026CCB1A58EF9600B97F2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "${HOME}";
+				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = NO;
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		48026CBD1A58EF9600B97F2D /* Build configuration list for PBXProject "ZLGotoSandbox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48026CC71A58EF9600B97F2D /* Debug */,
+				48026CC81A58EF9600B97F2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		48026CC91A58EF9600B97F2D /* Build configuration list for PBXNativeTarget "ZLGotoSandbox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48026CCA1A58EF9600B97F2D /* Debug */,
+				48026CCB1A58EF9600B97F2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 48026CBA1A58EF9600B97F2D /* Project object */;
+}
