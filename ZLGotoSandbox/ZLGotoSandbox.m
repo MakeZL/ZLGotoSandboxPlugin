@@ -17,10 +17,11 @@
 - (NSArray *)items{
     if (!_items) {
         _items = @[
-                   @"Goto,iOS8.1 Simulator!",
-                   @"Goto,iOS8.0 Simulator!",
-                   @"Goto,iOS7.1 Simulator!",
-                   @"Goto,iOS7.0 Simulator!"
+                   @"Go,iOS8.1 Simulator!",
+                   @"Go,iOS8.0 Simulator!",
+                   @"Go,iOS7.1 Simulator!",
+                   @"Go,iOS7.0 Simulator!"
+                   
                  ];
     }
     return _items;
@@ -47,10 +48,16 @@
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
+    
     NSMenuItem *editMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+    
     NSMenuItem *newMenuItem = [[NSMenuItem alloc] init];
     newMenuItem.title = @"Go to Sandbox!";
+    newMenuItem.state = NSOnState;
+    
+    NSMenu *subMenu = [[NSMenu alloc] init];;
+    newMenuItem.submenu = subMenu;
     [newMenuItem setKeyEquivalentModifierMask:NSAlternateKeyMask];
     [[editMenuItem submenu] addItem:newMenuItem];
     
@@ -60,7 +67,7 @@
         [newMenuItem2 setTarget:self];
         [newMenuItem2 setAction:@selector(gotoSandBox:)];
         [newMenuItem2 setKeyEquivalentModifierMask:NSAlternateKeyMask];
-        [[editMenuItem submenu] addItem:newMenuItem2];
+        [subMenu addItem:newMenuItem2];
     }
 }
 
