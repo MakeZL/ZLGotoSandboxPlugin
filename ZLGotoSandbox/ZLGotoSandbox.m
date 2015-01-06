@@ -37,28 +37,32 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
 
 - (NSArray *)items{
     if (!_items) {
-        
-        ZLSandBox *box81 = [[ZLSandBox alloc] init];
-        box81.boxName = @"Go,iOS8.1 Simulator!";
-        box81.items = [self projectsWithBox:box81];
-        
-        ZLSandBox *box80 = [[ZLSandBox alloc] init];
-        box80.boxName = @"Go,iOS8.0 Simulator!";
-        box80.items = [self projectsWithBox:box80];
-        
-        ZLSandBox *box71 = [[ZLSandBox alloc] init];
-        box71.boxName = @"Go,iOS7.1 Simulator!";
-        box71.items = [self projectsWithBox:box71];
-        
-        ZLSandBox *box70 = [[ZLSandBox alloc] init];
-        box70.boxName = @"Go,iOS7.0 Simulator!";
-        box70.items = [self projectsWithBox:box70];
-        
-        _items = @[
-                   box81,box80,box71,box70
-                 ];
+        self.items = [self setupItems];
     }
     return _items;
+}
+
+#pragma mark - setupItems
+- (NSArray *)setupItems{
+    
+    NSMutableArray *items = [NSMutableArray array];
+    NSArray *plists = [self getDeviceInfoPlists];
+    
+    for (NSDictionary *dict in plists) {
+        NSString *version = [[[dict valueForKeyPath:@"runtime"]   componentsSeparatedByString:@"."] lastObject] ;
+        NSString *device = [dict valueForKeyPath:@"name"];
+        
+        NSString *boxName = [NSString stringWithFormat:@"%@ (%@)",device, version];
+        
+        ZLSandBox *box = [[ZLSandBox alloc] init];
+        box.boxName = boxName;
+        box.version = version;
+        box.device = device;
+        box.items = [self projectsWithBox:box];
+        
+        [items addObject:box];
+    }
+    return items;
 }
 
 
@@ -106,15 +110,17 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
         NSMenu *versionSubMenu = [[NSMenu alloc] init];
         for (NSInteger j = 0; j < sandbox.items.count; j++) {
             ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+            versionSubMenuItem.index = j;
+            versionSubMenuItem.sandbox = sandbox;
             [versionSubMenuItem setTarget:self];
             [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
-            versionSubMenuItem.projectSandBoxPath = sandbox.projectSandBoxPath[j];
             versionSubMenuItem.title = sandbox.items[j];
             [versionSubMenu addItem:versionSubMenuItem];
         }
         
         
-        NSMenuItem *versionMenu = [[NSMenuItem alloc] init];
+        ZLMenuItem *versionMenu = [[ZLMenuItem alloc] init];
+        versionMenu.sandbox = sandbox;
         versionMenu.title = [self.items[i] boxName];
         versionMenu.submenu = versionSubMenu;
         
@@ -130,8 +136,7 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
 #pragma mark - show Projects all aplications.
 - (NSArray *)projectsWithBox:(ZLSandBox *)box{
     
-    NSString *version = [self getVersionWithTitle:box.boxName];
-    NSString *path = [self getDevicePath:self.homePath version:version];
+    NSString *path = [self getDevicePath:box];
 
     NSMutableArray *names = [NSMutableArray array];
     NSMutableArray *projectSandBoxPath = [NSMutableArray array];
@@ -169,11 +174,11 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
 }
 
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
-    [self openFinderWithFilePath:item.projectSandBoxPath];
+    [self openFinderWithFilePath:item.sandbox.projectSandBoxPath[item.index]];
 }
 
 #pragma mark - go to sandbox list.
-- (void)gotoSandBox:(NSMenuItem *)item{
+- (void)gotoSandBox:(ZLMenuItem *)item{
     
     if (!item.title.length) {
         return ;
@@ -183,18 +188,13 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
     // 1.look directionary has Device.plist (查看文件夹底下是否有device.plist文件)。
     // 2.find runtime field. (找到runtime的字段) rangeOfString 查看是否有相应的信息
     // 3.also is have runtime field . It jump To data/Containers/Data/Application. (如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application)
-    
-    NSString *version = [self getVersionWithTitle:item.title];
-
-    NSString *path = [self getDevicePath:self.homePath version:version];
-    if (!path.length) {
-        path = self.homePath;
-        NSString *msgText = [NSString stringWithFormat:@"您没有%@版本的目录.\n给您跳转到模拟器的根目录.",version];
-        [self showMessageText:msgText];
-    }
-    
+    NSString *path = [self getDevicePath:item.sandbox];
     // open Finder
+    if (!path.length) {
+        [self showMessageText:[NSString stringWithFormat:@"%@版本的模拟器还没有任何的程序\n给您跳转到它的根目录 (*^__^*)", item.sandbox.boxName]];
+    }
     [self openFinderWithFilePath:path];
+    
 }
 
 
@@ -205,74 +205,73 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
     system(str);
 }
 
-#pragma mark - This is Version Make.
-- (NSString *)getVersionWithTitle:(NSString *)title{
-    NSString *version = nil;
-    NSRange range = [title rangeOfString:@"iOS8.1"];
-    if (range.location != NSNotFound) {
-        version = @"iOS-8-1";
+#pragma mark - get Simulator List Path.
+- (NSString *)getDevicePath:(ZLSandBox *)sandbox{
+    
+    NSString *filePath = self.homePath;
+    if(![self.fileManager fileExistsAtPath:filePath]){
+        return nil;
     }
     
-    if (version == nil) {
-        range = [title rangeOfString:@"iOS8.0"];
-        if (range.location != NSNotFound) {
-            version = @"iOS-8-0";
-        }
-    }
+    NSArray *files = [self.fileManager contentsOfDirectoryAtPath:filePath error:nil];
     
-    if (version == nil) {
-        range = [title rangeOfString:@"iOS7.1"];
-        if (range.location != NSNotFound) {
-            version = @"iOS-7-1";
+    for (NSString *filesPath in files) {
+        NSString *devicePath =  [[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"device.plist"];
+
+        NSString *ApplicationPath = [self getBundlePath:filesPath];
+        
+        NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
+        if (dict.allKeys.count) {
+            NSRange range = [[dict valueForKey:@"name"] rangeOfString:sandbox.device];
+            if (range.location != NSNotFound) {
+                if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
+                    ApplicationPath = [self getBundleApllcationPath:filesPath];
+                    if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
+                        return nil;
+                        //return [self.homePath stringByAppendingPathComponent:filesPath];
+                    }
+                }
+                ApplicationPath = [self getBundleApllcationPath:filesPath];
+                if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
+                    ApplicationPath = [self getBundlePath:filesPath];
+                }
+                
+                return ApplicationPath;
+                
+            }
         }
     }
+    return nil;
+}
     
-    if (version == nil) {
-        range = [title rangeOfString:@"iOS7.0"];
-        if (range.location != NSNotFound) {
-            version = @"iOS-7-0";
-        }
-    }
-    return version;
+- (NSString *)getBundlePath:(NSString *)filePath{
+    return [[[[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Containers"] stringByAppendingPathComponent:@"Data"] stringByAppendingPathComponent:@"Application"];
 }
 
-#pragma mark - get Simulator List Path.
-- (NSString *)getDevicePath:(NSString *)filePath version:(NSString *)version{
-    
-    NSString *applicationPath = nil;
-    if([self.fileManager fileExistsAtPath:filePath]){
-        
-        NSArray *files = [self.fileManager contentsOfDirectoryAtPath:filePath error:nil];
+- (NSString *)getBundleApllcationPath:(NSString *)filePath{
+   return [[[filePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
+}
+
+#pragma mark - load all device plist info.
+- (NSArray *)getDeviceInfoPlists{
+    NSMutableArray *plists = [NSMutableArray array];
+    if([self.fileManager fileExistsAtPath:self.homePath]){
+        NSArray *files = [self.fileManager contentsOfDirectoryAtPath:self.homePath error:nil];
         
         for (NSString *filesPath in files) {
             
-            NSString *devicePath =  [[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"device.plist"];
-            
-            NSString *ApplicationPath = [[[[[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Containers"] stringByAppendingPathComponent:@"Data"] stringByAppendingPathComponent:@"Application"];
-            
-            if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                ApplicationPath = [[[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
-                if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                    continue;
-                }
+            NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"device.plist"];
+            if (![self.fileManager fileExistsAtPath:devicePath]) {
+                continue;
             }
             
             NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
             if (dict.allKeys.count) {
-                NSRange range = [[dict valueForKey:@"runtime"] rangeOfString:version];
-                if (range.location != NSNotFound) {
-                    NSString *ApplicationPath = [[[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
-                    if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                        ApplicationPath = [[[[[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Containers"] stringByAppendingPathComponent:@"Data"] stringByAppendingPathComponent:@"Application"];
-                    }
-                    
-                    return ApplicationPath;
-                    
-                }
+                [plists addObject:dict];
             }
         }
     }
-    return applicationPath;
+    return plists;
 }
 
 #pragma mark - alert Message with text

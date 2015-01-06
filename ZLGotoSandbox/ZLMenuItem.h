@@ -7,10 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "ZLSandBox.h"
 
 @interface ZLMenuItem : NSMenuItem
+
 /**
- *  沙盒的路径
+ *  索引值
  */
-@property (copy,nonatomic) NSString *projectSandBoxPath;
+@property (assign,nonatomic) NSInteger index;
+@property (strong,nonatomic) ZLSandBox *sandbox;
+
 @end

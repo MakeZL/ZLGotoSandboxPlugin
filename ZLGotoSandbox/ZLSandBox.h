@@ -9,7 +9,11 @@
 #import <Foundation/Foundation.h>
 
 @interface ZLSandBox : NSObject
+
+@property (copy,nonatomic) NSString *version;
+@property (copy,nonatomic) NSString *device;
 @property (copy,nonatomic) NSString *boxName;
+
 @property (strong,nonatomic) NSArray *items;
 /**
  *  沙盒的路径
