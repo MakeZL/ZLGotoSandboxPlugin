@@ -118,16 +118,23 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
             [versionSubMenu addItem:versionSubMenuItem];
         }
         
+        if (!sandbox.items.count) {
+            ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+            versionSubMenuItem.state = NSOffState;
+            versionSubMenuItem.title = @"您没有运行程序到这个模拟器.";
+            [versionSubMenu addItem:versionSubMenuItem];
+        }
         
-        ZLMenuItem *versionMenu = [[ZLMenuItem alloc] init];
-        versionMenu.sandbox = sandbox;
-        versionMenu.title = [self.items[i] boxName];
-        versionMenu.submenu = versionSubMenu;
         
-        [versionMenu setTarget:self];
-        [versionMenu setAction:@selector(gotoSandBox:)];
-        [versionMenu setKeyEquivalentModifierMask:NSAlternateKeyMask];
-        [startSubMenu addItem:versionMenu];
+        ZLMenuItem *versionMenuItem = [[ZLMenuItem alloc] init];
+        versionMenuItem.sandbox = sandbox;
+        [versionMenuItem setImage:[NSImage imageNamed:@"left_mask_btn_high"]];
+        versionMenuItem.title = [self.items[i] boxName];
+        versionMenuItem.submenu = versionSubMenu;
+        
+        [versionMenuItem setTarget:self];
+        [versionMenuItem setAction:@selector(gotoSandBox:)];
+        [startSubMenu addItem:versionMenuItem];
         
     }
 }
