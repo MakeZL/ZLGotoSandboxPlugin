@@ -5,4 +5,4 @@ ZLGotoSandboxPlugin-Xcode
 #####Currently only supports Xcode6
 ![image](https://github.com/MakeZL/ZLGotoSandboxPlugin/blob/master/1.png)
 #####You need to run the program after the restart Xcode
-![image](https://github.com/MakeZL/ZLGotoSandboxPlugin/blob/master/3.png)
+![image](https://github.com/MakeZL/ZLGotoSandboxPlugin/blob/master/4.png)
