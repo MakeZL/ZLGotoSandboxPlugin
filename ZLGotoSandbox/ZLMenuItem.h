@@ -11,9 +11,7 @@
 
 @interface ZLMenuItem : NSMenuItem
 
-/**
- *  索引值
- */
+//索引值
 @property (assign,nonatomic) NSInteger index;
 @property (strong,nonatomic) ZLSandBox *sandbox;
 

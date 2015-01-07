@@ -19,6 +19,7 @@
 @implementation ZLGotoSandbox
 
 static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
+static NSString * DevicePlist = @"device.plist";
 
 #pragma mark - lazy getter datas.
 - (NSFileManager *)fileManager{
@@ -135,10 +136,8 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
         [versionMenuItem setTarget:self];
         [versionMenuItem setAction:@selector(gotoSandBox:)];
         [startSubMenu addItem:versionMenuItem];
-        
     }
 }
-
 
 #pragma mark - show Projects all aplications.
 - (NSArray *)projectsWithBox:(ZLSandBox *)box{
@@ -198,7 +197,8 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
     NSString *path = [self getDevicePath:item.sandbox];
     // open Finder
     if (!path.length) {
-        [self showMessageText:[NSString stringWithFormat:@"%@版本的模拟器还没有任何的程序\n给您跳转到它的根目录 (*^__^*)", item.sandbox.boxName]];
+        path = self.homePath;
+        [self showMessageText:[NSString stringWithFormat:@"%@版本的模拟器还没有任何的程序\n给您跳转到根目录 (*^__^*)", item.sandbox.boxName]];
     }
     [self openFinderWithFilePath:path];
     
@@ -223,7 +223,7 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
     NSArray *files = [self.fileManager contentsOfDirectoryAtPath:filePath error:nil];
     
     for (NSString *filesPath in files) {
-        NSString *devicePath =  [[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"device.plist"];
+        NSString *devicePath =  [[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
 
         NSString *ApplicationPath = [self getBundlePath:filesPath];
         
@@ -267,7 +267,7 @@ static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
         
         for (NSString *filesPath in files) {
             
-            NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:@"device.plist"];
+            NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
             if (![self.fileManager fileExistsAtPath:devicePath]) {
                 continue;
             }
