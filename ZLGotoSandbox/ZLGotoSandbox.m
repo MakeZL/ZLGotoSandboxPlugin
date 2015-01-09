@@ -72,7 +72,10 @@ static NSString * DevicePlist = @"device.plist";
 - (instancetype)init{
     if (self = [super init]) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:@"IDEWorkspaceIndexRegistrationBatchNotification" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:@"IDEEditorDocumentDidChangeNotification" object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getProjectNotification:) name:nil object:nil];
     }
     return self;
 }
@@ -90,11 +93,21 @@ static NSString * DevicePlist = @"device.plist";
     return instance;
 }
 
+- (void)getProjectNotification:(NSNotification *)noti{
+    NSLog(@"%@ -- %@",noti, noti.name);
+}
+
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
     
+    
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
-    [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+    NSMenuItem *lastItem = [[[AppMenuItem submenu] itemArray] lastObject];
+    if ([lastItem.title isEqualToString:@"Go to Sandbox!"]) {
+        [lastItem.menu removeItem:lastItem];
+    }else{
+        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+    }
     
     NSMenuItem *startMenuItem = [[NSMenuItem alloc] init];
     startMenuItem.title = @"Go to Sandbox!";
@@ -162,10 +175,6 @@ static NSString * DevicePlist = @"device.plist";
 
 #pragma mark - get Current Directory
 - (void)nowProjectNotification:(NSNotification *)noti{
-    if (self.path.length) {
-        return ;
-    }
-    
     NSString *path = [[[noti.object description] componentsSeparatedByString:@"path:"] lastObject];
     path = [path stringByReplacingOccurrencesOfString:@">" withString:@""];
     
