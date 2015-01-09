@@ -20,18 +20,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2015年 com.zixue101.www. All rights reserved.</string>
-	<key>NSPrincipalClass</key>
-	<string>ZLGotoSandbox</string>
-	<key>XCGCReady</key>
-	<true/>
-	<key>XC4Compatible</key>
-	<true/>
-	<key>XC5Compatible</key>
-	<true/>
-	<key>XCPluginHasUI</key>
-	<false/>
 	<key>DVTPlugInCompatibilityUUIDs</key>
 	<array>
 		<string>A2E4D43F-41F4-4FB9-BB94-7177011C9AED</string>
@@ -40,5 +28,17 @@
 	</array>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2015年 com.zixue101.www. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>ZLGotoSandbox</string>
+	<key>XC4Compatible</key>
+	<true/>
+	<key>XC5Compatible</key>
+	<true/>
+	<key>XCGCReady</key>
+	<true/>
+	<key>XCPluginHasUI</key>
+	<false/>
 </dict>
 </plist>
