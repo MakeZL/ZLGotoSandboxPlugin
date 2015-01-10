@@ -21,6 +21,9 @@
 
 static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
 static NSString * DevicePlist = @"device.plist";
+static NSString * MenuTitle = @"Go to Sandbox!";
+static NSString * PrefixMenuTitle = @"当前项目 - ";
+static NSString * PrefixFile = @"Add Files to “";
 
 #pragma mark - lazy getter datas.
 - (NSFileManager *)fileManager{
@@ -71,11 +74,9 @@ static NSString * DevicePlist = @"device.plist";
 #pragma mark - init
 - (instancetype)init{
     if (self = [super init]) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:@"IDEWorkspaceIndexRegistrationBatchNotification" object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:@"IDEEditorDocumentDidChangeNotification" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowProjectNotification:) name:NSApplicationDidFinishLaunchingNotification object:nil];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getProjectNotification:) name:nil object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
     }
     return self;
 }
@@ -93,41 +94,69 @@ static NSString * DevicePlist = @"device.plist";
     return instance;
 }
 
-- (void)getProjectNotification:(NSNotification *)noti{
-    NSLog(@"%@ -- %@",noti, noti.name);
+#pragma mark - addObserver change xcode project.
+- (void)applicationDidAddCurrentMenu:(NSNotification *)noti{
+    NSMenu *menu = noti.object;
+    if ([menu.title isEqualToString:@"File"]) {
+        for (NSMenuItem *item in [menu itemArray]) {
+        NSRange r = [item.title rangeOfString:PrefixFile];
+        if (r.location != NSNotFound) {
+            NSString *path = [item.title stringByReplacingOccurrencesOfString:PrefixFile withString:@""];
+            
+            NSRange range = [path rangeOfString:@"”"];
+            path = [path substringToIndex:range.location];
+            self.path = path;
+            break;
+        }
+    }
+    [self applicationDidFinishLaunching:nil];
+}
 }
 
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
     
-    
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
-    NSMenuItem *lastItem = [[[AppMenuItem submenu] itemArray] lastObject];
-    if ([lastItem.title isEqualToString:@"Go to Sandbox!"]) {
-        [lastItem.menu removeItem:lastItem];
-    }else{
+    NSMenuItem *startMenuItem = nil;
+    NSMenu *startSubMenu = nil;
+    
+    // 如果没有切换过项目/Xcode
+    if (noti) {
         [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+        startMenuItem = [[NSMenuItem alloc] init];
+        startMenuItem.title = MenuTitle;
+        startMenuItem.state = NSOnState;
+        
+        startSubMenu  = [[NSMenu alloc] init];
+        startMenuItem.submenu = startSubMenu;
+        [startMenuItem setKeyEquivalentModifierMask:NSAlternateKeyMask];
+        [[AppMenuItem submenu] addItem:startMenuItem];
+    }else{
+        // 如果切换了项目/Xcode,就从列表取,不需要再次创建,节省内存
+        for (NSMenuItem *item in [[AppMenuItem submenu] itemArray]) {
+            if ([item.title isEqualToString:MenuTitle]) {
+                startMenuItem = item;
+                startSubMenu = item.submenu;
+                break;
+            }
+        }
     }
     
-    NSMenuItem *startMenuItem = [[NSMenuItem alloc] init];
-    startMenuItem.title = @"Go to Sandbox!";
-    startMenuItem.state = NSOnState;
-    
-    NSMenu *startSubMenu = [[NSMenu alloc] init];
-    startMenuItem.submenu = startSubMenu;
-    [startMenuItem setKeyEquivalentModifierMask:NSAlternateKeyMask];
-    [[AppMenuItem submenu] addItem:startMenuItem];
-    
-    
     for (NSInteger i = 0; i < self.items.count; i++) {
-        
         ZLSandBox *sandbox = [self.items objectAtIndex:i];
         NSInteger pathIndex = 0;
-        NSMenu *versionSubMenu = [[NSMenu alloc] init];
+        NSMenu *versionSubMenu = nil;
+        if (noti) {
+            versionSubMenu = [[NSMenu alloc] init];
+        }else{
+            versionSubMenu = [[startSubMenu itemAtIndex:i] submenu];
+        }
+        
         for (NSInteger j = 0; j < sandbox.items.count; j++) {
             if (self.path.length && [sandbox.items[j] isEqualToString:self.path]){
                 pathIndex = j;
             }else{
+             if (noti) {
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
                 versionSubMenuItem.index = j;
                 versionSubMenuItem.sandbox = sandbox;
@@ -135,62 +164,48 @@ static NSString * DevicePlist = @"device.plist";
                 [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
                 versionSubMenuItem.title = sandbox.items[j];
                 [versionSubMenu addItem:versionSubMenuItem];
-            }
+             }
+           }
         }
         
         if (!sandbox.items.count) {
-            ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
-            versionSubMenuItem.state = NSOffState;
-            versionSubMenuItem.title = @"您没有运行程序到这个模拟器.";
-            [versionSubMenu addItem:versionSubMenuItem];
-        }else{
-            if (self.path.length && [sandbox.items[pathIndex] isEqualToString:self.path]) {
+            if (noti) {
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+                versionSubMenuItem.state = NSOffState;
+                versionSubMenuItem.title = @"您没有运行程序到这个模拟器.";
+                [versionSubMenu addItem:versionSubMenuItem];
+            }
+        }else{
+            if (self.path.length && [sandbox.items[pathIndex] isEqualToString:self.path] ) {
+                ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
+                NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
+                if (!([title isEqualToString:self.path]) && versionSubMenuItem.tag != 101) {
+                    versionSubMenuItem = [[ZLMenuItem alloc] init];
+                    versionSubMenuItem.tag = 101;
+                    [versionSubMenuItem setTarget:self];
+                    [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
+                    [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
+                    [versionSubMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
+
+                }
+                
                 versionSubMenuItem.index = pathIndex;
                 versionSubMenuItem.sandbox = sandbox;
-                [versionSubMenuItem setTarget:self];
-                [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
-                versionSubMenuItem.title = [NSString stringWithFormat:@"当前项目 - %@",sandbox.items[pathIndex]];
-                [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
-                
-                
-                [versionSubMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
+                versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
             }
         }
         
-        
-        ZLMenuItem *versionMenuItem = [[ZLMenuItem alloc] init];
-        versionMenuItem.sandbox = sandbox;
-        [versionMenuItem setImage:[NSImage imageNamed:@"EOEntity"]];
-        versionMenuItem.title = [self.items[i] boxName];
-        versionMenuItem.submenu = versionSubMenu;
-        
-        
-        [versionMenuItem setTarget:self];
-        [versionMenuItem setAction:@selector(gotoSandBox:)];
-        [startSubMenu addItem:versionMenuItem];
-        
-    }
-}
-
-#pragma mark - get Current Directory
-- (void)nowProjectNotification:(NSNotification *)noti{
-    NSString *path = [[[noti.object description] componentsSeparatedByString:@"path:"] lastObject];
-    path = [path stringByReplacingOccurrencesOfString:@">" withString:@""];
-    
-    NSArray *paths = [path componentsSeparatedByString:@"/"];
-    
-    
-    for (NSString *pathName in paths) {
-        NSRange range = [pathName rangeOfString:@".xcodeproj"];
-        if (range.location != NSNotFound) {
-            path = [pathName stringByReplacingOccurrencesOfString:@".xcodeproj" withString:@""];
-            self.path = path;
-            break;
+        if (noti) {
+            ZLMenuItem *versionMenuItem = [[ZLMenuItem alloc] init];
+            versionMenuItem.sandbox = sandbox;
+            versionMenuItem.title = [self.items[i] boxName];
+            versionMenuItem.submenu = versionSubMenu;
+            
+            [versionMenuItem setTarget:self];
+            [versionMenuItem setAction:@selector(gotoSandBox:)];
+            [startSubMenu addItem:versionMenuItem];
         }
     }
-    
-    [self applicationDidFinishLaunching:nil];
 }
 
 #pragma mark - show Projects all aplications.
@@ -251,6 +266,7 @@ static NSString * DevicePlist = @"device.plist";
     // 2.find runtime field. (找到runtime的字段) rangeOfString 查看是否有相应的信息
     // 3.also is have runtime field . It jump To data/Containers/Data/Application. (如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application)
     NSString *path = [self getDevicePath:item.sandbox];
+    NSLog(@"%@",path);
     // open Finder
     if (!path.length) {
         path = self.homePath;
