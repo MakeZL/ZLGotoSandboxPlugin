@@ -192,6 +192,13 @@ static NSString * PrefixFile = @"Add Files to “";
                 versionSubMenuItem.index = pathIndex;
                 versionSubMenuItem.sandbox = sandbox;
                 versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
+            }else{
+                // 清空
+                ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
+                if (versionSubMenuItem.tag == 101) {
+                    [versionSubMenu removeItem:versionSubMenuItem];
+                    [versionSubMenu removeItem:[[versionSubMenu itemArray] firstObject]];
+                }
             }
         }
         
