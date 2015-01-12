@@ -132,7 +132,6 @@ static NSString * PrefixFile = @"Add Files to “";
 
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
-//    NSLog(@" --- applicationDidFinishLaunching");
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
@@ -284,10 +283,11 @@ static NSString * PrefixFile = @"Add Files to “";
         return ;
     }
     
-    // 0.Get Click Version. (获取版本号)
-    // 1.look directionary has Device.plist (查看文件夹底下是否有device.plist文件)。
-    // 2.find runtime field. (找到runtime的字段) rangeOfString 查看是否有相应的信息
-    // 3.also is have runtime field . It jump To data/Containers/Data/Application. (如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application)
+    // Note:
+    // 1.获取版本号
+    // 2.查看文件夹底下是否有device.plist文件
+    // 3.Device.plist (找到runtime的字段) rangeOfString 查看是否有相应的信息 。
+    // 4.如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application
     NSString *path = [self getDevicePath:item.sandbox];
     // open Finder
     if (!path.length) {
@@ -301,6 +301,9 @@ static NSString * PrefixFile = @"Add Files to “";
 
 #pragma mark - Open Finder
 - (void)openFinderWithFilePath:(NSString *)path{
+    if (!path.length) {
+        return ;
+    }
     NSString *open = [NSString stringWithFormat:@"open %@",path];
     const char *str = [open UTF8String];
     system(str);
@@ -330,6 +333,7 @@ static NSString * PrefixFile = @"Add Files to “";
                 
                 if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
                     ApplicationPath = [self getBundleApllcationPath:filesPath];
+                    
                     if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
                         return nil;
                     }
@@ -337,13 +341,8 @@ static NSString * PrefixFile = @"Add Files to “";
                 
                 if (!ApplicationPath.length) {
                     ApplicationPath = [self getBundleApllcationPath:filesPath];
-                    if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                        ApplicationPath = [self getBundlePath:filesPath];
-                    }
                 }
-                
                 return ApplicationPath;
-                
             }
         }
     }
@@ -356,7 +355,7 @@ static NSString * PrefixFile = @"Add Files to “";
 }
 
 - (NSString *)getBundleApllcationPath:(NSString *)filePath{
-   return [[[filePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
+   return [[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
 }
 
 #pragma mark - load all device plist info.
