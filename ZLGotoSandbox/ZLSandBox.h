@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
 @interface ZLSandBox : NSObject
 
@@ -23,3 +24,12 @@
 @property (strong,nonatomic) NSArray *projectSandBoxPath;
 
 @end
+
+@interface ZLMenuItem : NSMenuItem
+
+//索引值
+@property (assign,nonatomic) NSInteger index;
+@property (strong,nonatomic) ZLSandBox *sandbox;
+
+@end
+

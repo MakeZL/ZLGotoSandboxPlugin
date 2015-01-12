@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */; };
 		48D09CD21A5A56A10099C95B /* ZLSandBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D09CD11A5A56A10099C95B /* ZLSandBox.m */; };
-		48EEF3701A5A6FA20063AA39 /* ZLMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 48EEF36F1A5A6FA20063AA39 /* ZLMenuItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,8 +18,6 @@
 		48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLGotoSandbox.m; sourceTree = "<group>"; };
 		48D09CD01A5A56A10099C95B /* ZLSandBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLSandBox.h; sourceTree = "<group>"; };
 		48D09CD11A5A56A10099C95B /* ZLSandBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLSandBox.m; sourceTree = "<group>"; };
-		48EEF36E1A5A6FA20063AA39 /* ZLMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLMenuItem.h; sourceTree = "<group>"; };
-		48EEF36F1A5A6FA20063AA39 /* ZLMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLMenuItem.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,8 +55,6 @@
 				48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */,
 				48D09CD01A5A56A10099C95B /* ZLSandBox.h */,
 				48D09CD11A5A56A10099C95B /* ZLSandBox.m */,
-				48EEF36E1A5A6FA20063AA39 /* ZLMenuItem.h */,
-				48EEF36F1A5A6FA20063AA39 /* ZLMenuItem.m */,
 			);
 			path = ZLGotoSandbox;
 			sourceTree = "<group>";
@@ -140,7 +135,6 @@
 			files = (
 				48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */,
 				48D09CD21A5A56A10099C95B /* ZLSandBox.m in Sources */,
-				48EEF3701A5A6FA20063AA39 /* ZLMenuItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

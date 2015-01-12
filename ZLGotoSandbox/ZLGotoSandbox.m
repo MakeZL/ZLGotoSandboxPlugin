@@ -8,7 +8,6 @@
 
 #import "ZLGotoSandbox.h"
 #import "ZLSandBox.h"
-#import "ZLMenuItem.h"
 
 @interface ZLGotoSandbox ()
 @property (copy,nonatomic) NSString *homePath;
@@ -75,9 +74,7 @@ static NSString * PrefixFile = @"Add Files to “";
 #pragma mark - init
 - (instancetype)init{
     if (self = [super init]) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
+        [self addNotification];
     }
     return self;
 }
@@ -95,6 +92,23 @@ static NSString * PrefixFile = @"Add Files to “";
     return instance;
 }
 
+- (void)addNotification{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
+}
+
+- (void)applicationDidAddNowCurrentProjectName:(NSNotification *)noti{
+    NSRange range = [[noti.object description] rangeOfString:@"> "];
+    NSString *path = [[noti.object description] substringFromIndex:range.location + range.length];
+    if (![self.path isEqualToString:path] || !self.path.length) {
+        self.path = path;
+        [self applicationDidFinishLaunching:nil];
+    }
+}
+
 #pragma mark - addObserver change xcode project.
 - (void)applicationDidAddCurrentMenu:(NSNotification *)noti{
     NSMenu *menu = noti.object;
@@ -106,17 +120,19 @@ static NSString * PrefixFile = @"Add Files to “";
             
             NSRange range = [path rangeOfString:@"”"];
             path = [path substringToIndex:range.location];
-            self.path = path;
-            break;
+            
+            if (![self.path isEqualToString:path] || !self.path.length) {
+                self.path = path;
+                [self applicationDidFinishLaunching:nil];
+            }
         }
     }
-    [self applicationDidFinishLaunching:nil];
 }
 }
 
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
-    
+//    NSLog(@" --- applicationDidFinishLaunching");
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
@@ -220,7 +236,6 @@ static NSString * PrefixFile = @"Add Files to “";
 - (NSArray *)projectsWithBox:(ZLSandBox *)box{
     
     NSString *path = [self getDevicePath:box];
-//    NSLog(@"ZLPAth : %@",path);
     NSMutableArray *names = [NSMutableArray array];
     NSMutableArray *projectSandBoxPath = [NSMutableArray array];
     
