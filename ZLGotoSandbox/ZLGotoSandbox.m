@@ -60,6 +60,7 @@ static NSString * PrefixFile = @"Add Files to “";
         NSString *boxName = [NSString stringWithFormat:@"%@ (%@)",device, version];
         
         ZLSandBox *box = [[ZLSandBox alloc] init];
+        box.udid = dict[@"UDID"];
         box.boxName = boxName;
         box.version = version;
         box.device = device;
@@ -219,7 +220,7 @@ static NSString * PrefixFile = @"Add Files to “";
 - (NSArray *)projectsWithBox:(ZLSandBox *)box{
     
     NSString *path = [self getDevicePath:box];
-
+//    NSLog(@"ZLPAth : %@",path);
     NSMutableArray *names = [NSMutableArray array];
     NSMutableArray *projectSandBoxPath = [NSMutableArray array];
     
@@ -273,7 +274,6 @@ static NSString * PrefixFile = @"Add Files to “";
     // 2.find runtime field. (找到runtime的字段) rangeOfString 查看是否有相应的信息
     // 3.also is have runtime field . It jump To data/Containers/Data/Application. (如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application)
     NSString *path = [self getDevicePath:item.sandbox];
-    NSLog(@"%@",path);
     // open Finder
     if (!path.length) {
         path = self.homePath;
@@ -294,32 +294,37 @@ static NSString * PrefixFile = @"Add Files to “";
 #pragma mark - get Simulator List Path.
 - (NSString *)getDevicePath:(ZLSandBox *)sandbox{
     
-    NSString *filePath = self.homePath;
-    if(![self.fileManager fileExistsAtPath:filePath]){
+    if(![self.fileManager fileExistsAtPath:self.homePath]){
         return nil;
     }
     
-    NSArray *files = [self.fileManager contentsOfDirectoryAtPath:filePath error:nil];
+    NSArray *files = [self.fileManager contentsOfDirectoryAtPath:self.homePath error:nil];
+    
+    NSString *ApplicationPath = nil;
     
     for (NSString *filesPath in files) {
-        NSString *devicePath =  [[filePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
+        NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
 
-        NSString *ApplicationPath = [self getBundlePath:filesPath];
-        
+        ApplicationPath = [self getBundlePath:filesPath];
         NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
+        
         if (dict.allKeys.count) {
-            NSRange range = [[dict valueForKey:@"name"] rangeOfString:sandbox.device];
+            NSRange range = [[dict valueForKey:@"UDID"] rangeOfString:sandbox.udid];
+            
             if (range.location != NSNotFound) {
+                
                 if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
                     ApplicationPath = [self getBundleApllcationPath:filesPath];
                     if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
                         return nil;
-                        //return [self.homePath stringByAppendingPathComponent:filesPath];
                     }
                 }
-                ApplicationPath = [self getBundleApllcationPath:filesPath];
-                if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                    ApplicationPath = [self getBundlePath:filesPath];
+                
+                if (!ApplicationPath.length) {
+                    ApplicationPath = [self getBundleApllcationPath:filesPath];
+                    if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
+                        ApplicationPath = [self getBundlePath:filesPath];
+                    }
                 }
                 
                 return ApplicationPath;
@@ -327,7 +332,8 @@ static NSString * PrefixFile = @"Add Files to “";
             }
         }
     }
-    return nil;
+    
+    return ApplicationPath;
 }
     
 - (NSString *)getBundlePath:(NSString *)filePath{
