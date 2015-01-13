@@ -23,6 +23,7 @@ static NSString * DevicePlist = @"device.plist";
 static NSString * MenuTitle = @"Go to Sandbox!";
 static NSString * PrefixMenuTitle = @"当前项目 - ";
 static NSString * PrefixFile = @"Add Files to “";
+static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - lazy getter datas.
 - (NSFileManager *)fileManager{
@@ -121,13 +122,13 @@ static NSString * PrefixFile = @"Add Files to “";
             NSRange range = [path rangeOfString:@"”"];
             path = [path substringToIndex:range.location];
             
-            if (![self.path isEqualToString:path] || !self.path.length) {
-                self.path = path;
-                [self applicationDidFinishLaunching:nil];
+                if (![self.path isEqualToString:path] || !self.path.length) {
+                    self.path = path;
+                    [self applicationDidFinishLaunching:nil];
+                }
             }
         }
     }
-}
 }
 
 #pragma mark - initMenu
@@ -138,6 +139,7 @@ static NSString * PrefixFile = @"Add Files to “";
     
     // 如果没有切换过项目/Xcode
     if (noti) {
+        
         [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         startMenuItem = [[NSMenuItem alloc] init];
         startMenuItem.title = MenuTitle;
@@ -173,7 +175,13 @@ static NSString * PrefixFile = @"Add Files to “";
                 pathIndex = j;
             }else{
              if (noti) {
+                 NSString *imagePath = [self getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[j]];
+                 NSData *data = [NSData dataWithContentsOfFile:imagePath];
+                 NSImage *image = [[NSImage alloc] initWithData:data];
+                 [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
+                 
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+                versionSubMenuItem.image = image;
                 versionSubMenuItem.index = j;
                 versionSubMenuItem.sandbox = sandbox;
                 [versionSubMenuItem setTarget:self];
@@ -202,8 +210,14 @@ static NSString * PrefixFile = @"Add Files to “";
                     [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
                     [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
                     [versionSubMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
-
+                    
+                    NSString *imagePath = [self getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[pathIndex]];
+                    NSData *data = [NSData dataWithContentsOfFile:imagePath];
+                    NSImage *image = [[NSImage alloc] initWithData:data];
+                    [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
+                    versionSubMenuItem.image = image;
                 }
+                
                 
                 versionSubMenuItem.index = pathIndex;
                 versionSubMenuItem.sandbox = sandbox;
@@ -241,7 +255,7 @@ static NSString * PrefixFile = @"Add Files to “";
     NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:path error:nil];
     for (NSString *pathName in paths) {
         NSString *fileName = [path stringByAppendingPathComponent:pathName];
-        NSString *fileUrl = [fileName stringByAppendingPathComponent:@".com.apple.mobile_container_manager.metadata.plist"];
+        NSString *fileUrl = [self getDataDictPathWithFileName:fileName];
         
         if(![self.fileManager fileExistsAtPath:fileUrl]){
             NSArray *arr = [self.fileManager contentsOfDirectoryAtPath:fileName error:nil];
@@ -256,11 +270,9 @@ static NSString * PrefixFile = @"Add Files to “";
             }
         }else{
             NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:fileUrl];
-            if ([dict valueForKeyPath:@"MCMMetadataIdentifier"]) {
-                NSArray *array = [dict[@"MCMMetadataIdentifier"] componentsSeparatedByString:@"."];
-                NSString *projectName = [array lastObject];
-                projectName = [projectName stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
-                [names addObject:projectName];
+            if ([dict valueForKeyPath:MCMMetadataIdentifier]) {
+                
+                [names addObject:[self getAppName:dict[MCMMetadataIdentifier]]];
                 [projectSandBoxPath addObject:fileName];
 
             }
@@ -298,6 +310,13 @@ static NSString * PrefixFile = @"Add Files to “";
     
 }
 
+- (NSString *)getDataDictPathWithFileName:(NSString *)fileName{
+    return [fileName stringByAppendingPathComponent:@".com.apple.mobile_container_manager.metadata.plist"];
+}
+
+- (NSDictionary *)getDataDictWithFileName:(NSString *)fileName{
+    return [NSDictionary dictionaryWithContentsOfFile:[self getDataDictPathWithFileName:fileName]];
+}
 
 #pragma mark - Open Finder
 - (void)openFinderWithFilePath:(NSString *)path{
@@ -323,7 +342,7 @@ static NSString * PrefixFile = @"Add Files to “";
     for (NSString *filesPath in files) {
         NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
 
-        ApplicationPath = [self getBundlePath:filesPath];
+        ApplicationPath = [self getDataPath:filesPath];
         NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
         
         if (dict.allKeys.count) {
@@ -332,7 +351,7 @@ static NSString * PrefixFile = @"Add Files to “";
             if (range.location != NSNotFound) {
                 
                 if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                    ApplicationPath = [self getBundleApllcationPath:filesPath];
+                    ApplicationPath = [self getDataApplicationPath:filesPath];
                     
                     if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
                         return nil;
@@ -340,7 +359,7 @@ static NSString * PrefixFile = @"Add Files to “";
                 }
                 
                 if (!ApplicationPath.length) {
-                    ApplicationPath = [self getBundleApllcationPath:filesPath];
+                    ApplicationPath = [self getDataApplicationPath:filesPath];
                 }
                 return ApplicationPath;
             }
@@ -349,13 +368,61 @@ static NSString * PrefixFile = @"Add Files to “";
     
     return ApplicationPath;
 }
-    
-- (NSString *)getBundlePath:(NSString *)filePath{
+
+- (NSString *)getDataPath:(NSString *)filePath{
     return [[[[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Containers"] stringByAppendingPathComponent:@"Data"] stringByAppendingPathComponent:@"Application"];
 }
 
-- (NSString *)getBundleApllcationPath:(NSString *)filePath{
+- (NSString *)getDataApplicationPath:(NSString *)filePath{
    return [[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
+}
+
+- (NSString *)getBundleImagePathWithFilePath:(NSString *)filePath{
+    
+    NSString *containersPath = [[[filePath stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+    
+    NSString *bundleApplicationPath = [[containersPath stringByAppendingPathComponent:@"Bundle"] stringByAppendingPathComponent:@"Application"];
+    
+    NSDictionary *dataDict = [self getDataDictWithFileName:filePath];
+    NSString *dataName = [self getAppName:dataDict[MCMMetadataIdentifier]];
+    
+    NSArray *applicationPaths = [self.fileManager contentsOfDirectoryAtPath:bundleApplicationPath error:nil];
+    for (NSString *applicationPath in applicationPaths) {
+        NSDictionary *dict = [self getDataDictWithFileName:[bundleApplicationPath stringByAppendingPathComponent:applicationPath]];
+        NSString *appDictPath = [self getAppName:dict[MCMMetadataIdentifier]];
+        if ([dataName isEqualToString:appDictPath]) {
+            
+            NSString *appPath = [bundleApplicationPath stringByAppendingPathComponent:applicationPath];
+            NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
+            NSString *appName = nil;
+            for (NSString *pathName in paths) {
+                if ([[pathName pathExtension] isEqualToString:@"app"]) {
+                    appName = pathName;
+                    break;
+                }
+            }
+            
+            if (appName) {
+                NSArray *resources = [self.fileManager contentsOfDirectoryAtPath:[appPath stringByAppendingPathComponent:appName] error:nil];
+                
+                for (NSString *resource in resources) {
+                    NSRange range = [resource rangeOfString:@"AppIcon"];
+                    if (range.location != NSNotFound) {
+                        return [[appPath stringByAppendingPathComponent:appName] stringByAppendingPathComponent:resource];
+                    }
+                }
+                
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSString *)getAppName:(NSString *)identifierName{
+    NSArray *array = [identifierName componentsSeparatedByString:@"."];
+    NSString *projectName = [array lastObject];
+    projectName = [projectName stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+    return projectName;
 }
 
 #pragma mark - load all device plist info.
