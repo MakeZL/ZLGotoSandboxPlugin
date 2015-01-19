@@ -139,7 +139,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     
     // 如果没有切换过项目/Xcode
     if (noti) {
-        
         [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         startMenuItem = [[NSMenuItem alloc] init];
         startMenuItem.title = MenuTitle;
@@ -285,7 +284,13 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 }
 
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
-    [self openFinderWithFilePath:item.sandbox.projectSandBoxPath[item.index]];
+    
+    NSString *path = item.sandbox.projectSandBoxPath[item.index];
+    if (![self.fileManager fileExistsAtPath:path]) {
+        path = [path stringByDeletingLastPathComponent];
+        [self showMessageText:@"您可能已经在模拟器删除了这个程序，给您跳转到它上一个目录。"];
+    }
+    [self openFinderWithFilePath:path];
 }
 
 #pragma mark - go to sandbox list.
@@ -323,6 +328,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     if (!path.length) {
         return ;
     }
+    
     NSString *open = [NSString stringWithFormat:@"open %@",path];
     const char *str = [open UTF8String];
     system(str);
