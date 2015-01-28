@@ -133,6 +133,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
+    
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
@@ -199,11 +200,17 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                 [versionSubMenu addItem:versionSubMenuItem];
             }
         }else{
-            if (self.path.length && [sandbox.items[pathIndex] isEqualToString:self.path] ) {
+            
+            if (self.path.length && [sandbox.items[pathIndex] rangeOfString:self.path].location != NSNotFound ) {
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
                 NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
-                if (!([title isEqualToString:self.path]) && versionSubMenuItem.tag != 101) {
-                    versionSubMenuItem = [[ZLMenuItem alloc] init];
+                
+                if (!([title rangeOfString:self.path].location != NSNotFound) || versionSubMenuItem.tag != 101) {
+                    ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+                    versionSubMenuItem.index = pathIndex;
+                    versionSubMenuItem.sandbox = sandbox;
+                    versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
+                    
                     versionSubMenuItem.tag = 101;
                     [versionSubMenuItem setTarget:self];
                     [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
@@ -217,10 +224,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     versionSubMenuItem.image = image;
                 }
                 
-                
-                versionSubMenuItem.index = pathIndex;
-                versionSubMenuItem.sandbox = sandbox;
-                versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
             }else{
                 // 清空
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
@@ -286,10 +289,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
     
     NSString *path = item.sandbox.projectSandBoxPath[item.index];
-    if (![self.fileManager fileExistsAtPath:path]) {
-        path = [path stringByDeletingLastPathComponent];
-        [self showMessageText:@"您可能已经在模拟器删除了这个程序，给您跳转到它上一个目录。"];
-    }
     [self openFinderWithFilePath:path];
 }
 
