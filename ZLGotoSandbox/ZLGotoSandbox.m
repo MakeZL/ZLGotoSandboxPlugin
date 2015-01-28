@@ -203,14 +203,11 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             
             if (self.path.length && [sandbox.items[pathIndex] rangeOfString:self.path].location != NSNotFound ) {
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
+                
                 NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
                 
-                if (!([title rangeOfString:self.path].location != NSNotFound) || versionSubMenuItem.tag != 101) {
-                    ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
-                    versionSubMenuItem.index = pathIndex;
-                    versionSubMenuItem.sandbox = sandbox;
-                    versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
-                    
+                if (![title isEqualToString:self.path] && versionSubMenuItem.tag != 101) {
+                    versionSubMenuItem = [[ZLMenuItem alloc] init];
                     versionSubMenuItem.tag = 101;
                     [versionSubMenuItem setTarget:self];
                     [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
@@ -222,6 +219,12 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     NSImage *image = [[NSImage alloc] initWithData:data];
                     [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
                     versionSubMenuItem.image = image;
+                }
+                
+                if (versionSubMenuItem.tag == 101) {
+                    versionSubMenuItem.index = pathIndex;
+                    versionSubMenuItem.sandbox = sandbox;
+                    versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
                 }
                 
             }else{
