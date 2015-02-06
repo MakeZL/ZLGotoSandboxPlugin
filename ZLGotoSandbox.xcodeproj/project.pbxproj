@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */; };
+		48CB61931A84708100127E6F /* ZLItemDatas.m in Sources */ = {isa = PBXBuildFile; fileRef = 48CB61921A84708100127E6F /* ZLItemDatas.m */; };
 		48D09CD21A5A56A10099C95B /* ZLSandBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D09CD11A5A56A10099C95B /* ZLSandBox.m */; };
 /* End PBXBuildFile section */
 
@@ -16,6 +17,8 @@
 		48026CC61A58EF9600B97F2D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		48026CCC1A58EFDD00B97F2D /* ZLGotoSandbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLGotoSandbox.h; sourceTree = "<group>"; };
 		48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLGotoSandbox.m; sourceTree = "<group>"; };
+		48CB61911A84708100127E6F /* ZLItemDatas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLItemDatas.h; sourceTree = "<group>"; };
+		48CB61921A84708100127E6F /* ZLItemDatas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLItemDatas.m; sourceTree = "<group>"; };
 		48D09CD01A5A56A10099C95B /* ZLSandBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZLSandBox.h; sourceTree = "<group>"; };
 		48D09CD11A5A56A10099C95B /* ZLSandBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZLSandBox.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,6 +58,8 @@
 				48026CCD1A58EFDD00B97F2D /* ZLGotoSandbox.m */,
 				48D09CD01A5A56A10099C95B /* ZLSandBox.h */,
 				48D09CD11A5A56A10099C95B /* ZLSandBox.m */,
+				48CB61911A84708100127E6F /* ZLItemDatas.h */,
+				48CB61921A84708100127E6F /* ZLItemDatas.m */,
 			);
 			path = ZLGotoSandbox;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 			files = (
 				48026CCE1A58EFDD00B97F2D /* ZLGotoSandbox.m in Sources */,
 				48D09CD21A5A56A10099C95B /* ZLSandBox.m in Sources */,
+				48CB61931A84708100127E6F /* ZLItemDatas.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +227,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "${HOME}";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ZLGotoSandbox",
+				);
 				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
 				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -235,6 +245,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "${HOME}";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ZLGotoSandbox",
+				);
 				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
 				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "$(TARGET_NAME)";

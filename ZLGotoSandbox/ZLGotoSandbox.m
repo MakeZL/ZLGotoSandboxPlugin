@@ -8,69 +8,38 @@
 
 #import "ZLGotoSandbox.h"
 #import "ZLSandBox.h"
+#import "ZLItemDatas.h"
 
 @interface ZLGotoSandbox ()
-@property (copy,nonatomic) NSString *homePath;
+
 @property (strong,nonatomic) NSArray *items;
-@property (strong,nonatomic) NSFileManager *fileManager;
 @property (copy,nonatomic) NSString *path;
+@property (strong,nonatomic) ZLSandBox *editSandbox;
+@property (strong,nonatomic) NSMutableArray *sources;
 @end
 
 @implementation ZLGotoSandbox
 
-static NSString * SimulatorPath = @"Library/Developer/CoreSimulator/Devices/";
-static NSString * DevicePlist = @"device.plist";
+static NSString * ZLChangeSandboxRefreshItems = @"ZLChangeSandboxRefreshItems";
 static NSString * MenuTitle = @"Go to Sandbox!";
 static NSString * PrefixMenuTitle = @"当前项目 - ";
 static NSString * PrefixFile = @"Add Files to “";
 static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - lazy getter datas.
-- (NSFileManager *)fileManager{
-    if (!_fileManager) {
-        self.fileManager = [NSFileManager defaultManager];
-    }
-    return _fileManager;
-}
-
-- (NSString *)homePath{
-    if (!_homePath) {
-        _homePath = [NSHomeDirectory() stringByAppendingPathComponent:SimulatorPath];
-    }
-    return _homePath;
-}
-
 - (NSArray *)items{
     if (!_items) {
-        self.items = [self setupItems];
+        self.items = [ZLItemDatas getAllItems];
     }
     return _items;
 }
 
-#pragma mark - setupItems
-- (NSArray *)setupItems{
-    
-    NSMutableArray *items = [NSMutableArray array];
-    NSArray *plists = [self getDeviceInfoPlists];
-    
-    for (NSDictionary *dict in plists) {
-        NSString *version = [[[dict valueForKeyPath:@"runtime"]   componentsSeparatedByString:@"."] lastObject] ;
-        NSString *device = [dict valueForKeyPath:@"name"];
-        
-        NSString *boxName = [NSString stringWithFormat:@"%@ (%@)",device, version];
-        
-        ZLSandBox *box = [[ZLSandBox alloc] init];
-        box.udid = dict[@"UDID"];
-        box.boxName = boxName;
-        box.version = version;
-        box.device = device;
-        box.items = [self projectsWithBox:box];
-        
-        [items addObject:box];
+- (NSMutableArray *)sources{
+    if (!_sources) {
+        _sources = [NSMutableArray array];
     }
-    return items;
+    return _sources;
 }
-
 
 #pragma mark - init
 - (instancetype)init{
@@ -138,9 +107,21 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
     
+    if ([noti.name isEqualToString:NSApplicationDidFinishLaunchingNotification]) {
+        // 第一次监听文件改变
+        [self addObserverFileChange];
+        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+    }else if ([noti.name isEqualToString:ZLChangeSandboxRefreshItems]){
+        for (NSMenuItem *item in [[AppMenuItem submenu] itemArray]) {
+            if ([item.title isEqualToString:MenuTitle]) {
+                [[AppMenuItem submenu] removeItem:item];
+                break;
+            }
+        }
+    }
+    
     // 如果没有切换过项目/Xcode
     if (noti) {
-        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         startMenuItem = [[NSMenuItem alloc] init];
         startMenuItem.title = MenuTitle;
         startMenuItem.state = NSOnState;
@@ -159,7 +140,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             }
         }
     }
-    
+
     for (NSInteger i = 0; i < self.items.count; i++) {
         ZLSandBox *sandbox = [self.items objectAtIndex:i];
         NSInteger pathIndex = 0;
@@ -169,18 +150,19 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         }else{
             versionSubMenu = [[startSubMenu itemAtIndex:i] submenu];
         }
-        
+    
         for (NSInteger j = 0; j < sandbox.items.count; j++) {
             if (self.path.length && [sandbox.items[j] isEqualToString:self.path]){
                 pathIndex = j;
-            }else{
-             if (noti) {
-                 NSString *imagePath = [self getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[j]];
-                 NSData *data = [NSData dataWithContentsOfFile:imagePath];
-                 NSImage *image = [[NSImage alloc] initWithData:data];
-                 [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
-                 
+            }
+            if (noti){
+                NSString *imagePath = [ZLItemDatas getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[j]];
+                NSData *data = [NSData dataWithContentsOfFile:imagePath];
+                NSImage *image = [[NSImage alloc] initWithData:data];
+                [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
+                
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
+
                 versionSubMenuItem.image = image;
                 versionSubMenuItem.index = j;
                 versionSubMenuItem.sandbox = sandbox;
@@ -188,8 +170,8 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                 [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
                 versionSubMenuItem.title = sandbox.items[j];
                 [versionSubMenu addItem:versionSubMenuItem];
-             }
-           }
+
+            }
         }
         
         if (!sandbox.items.count) {
@@ -201,7 +183,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             }
         }else{
             
-            if (self.path.length && [sandbox.items[pathIndex] rangeOfString:self.path].location != NSNotFound ) {
+            if ((self.path.length && [sandbox.items[pathIndex] rangeOfString:self.path].location != NSNotFound )) {
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
                 
                 NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
@@ -214,7 +196,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
                     [versionSubMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
                     
-                    NSString *imagePath = [self getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[pathIndex]];
+                    NSString *imagePath = [ZLItemDatas getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[pathIndex]];
                     NSData *data = [NSData dataWithContentsOfFile:imagePath];
                     NSImage *image = [[NSImage alloc] initWithData:data];
                     [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
@@ -227,6 +209,10 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
                 }
                 
+                
+                NSAttributedString *attr = [[NSAttributedString alloc] initWithString:versionSubMenuItem.title attributes:@{NSFontAttributeName: [NSFont userFontOfSize:16] , NSForegroundColorAttributeName:[NSColor redColor]}];
+                versionSubMenuItem.attributedTitle = attr;
+
             }else{
                 // 清空
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
@@ -250,45 +236,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     }
 }
 
-#pragma mark - show Projects all aplications.
-- (NSArray *)projectsWithBox:(ZLSandBox *)box{
-    
-    NSString *path = [self getDevicePath:box];
-    NSMutableArray *names = [NSMutableArray array];
-    NSMutableArray *projectSandBoxPath = [NSMutableArray array];
-    
-    NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:path error:nil];
-    for (NSString *pathName in paths) {
-        NSString *fileName = [path stringByAppendingPathComponent:pathName];
-        NSString *fileUrl = [self getDataDictPathWithFileName:fileName];
-        
-        if(![self.fileManager fileExistsAtPath:fileUrl]){
-            NSArray *arr = [self.fileManager contentsOfDirectoryAtPath:fileName error:nil];
-            for (NSString *str in arr) {
-                NSRange range = [str rangeOfString:@".app"];
-                if (range.location != NSNotFound) {
-                    [names addObject:
-                     [[str stringByReplacingOccurrencesOfString:@".app" withString:@""] stringByReplacingOccurrencesOfString:@"-" withString:@"_"]];
-                    
-                    [projectSandBoxPath addObject:fileName];
-                }
-            }
-        }else{
-            NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:fileUrl];
-            if ([dict valueForKeyPath:MCMMetadataIdentifier]) {
-                
-                [names addObject:[self getAppName:dict[MCMMetadataIdentifier]]];
-                [projectSandBoxPath addObject:fileName];
-
-            }
-        }
-    }
-    
-    box.projectSandBoxPath = projectSandBoxPath;
-    
-    return names;
-}
-
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
     
     NSString *path = item.sandbox.projectSandBoxPath[item.index];
@@ -307,22 +254,14 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     // 2.查看文件夹底下是否有device.plist文件
     // 3.Device.plist (找到runtime的字段) rangeOfString 查看是否有相应的信息 。
     // 4.如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application
-    NSString *path = [self getDevicePath:item.sandbox];
+    NSString *path = [ZLItemDatas getDevicePath:item.sandbox];
     // open Finder
     if (!path.length) {
-        path = self.homePath;
+        path = [ZLItemDatas getHomePath];
         [self showMessageText:[NSString stringWithFormat:@"%@版本的模拟器还没有任何的程序\n给您跳转到根目录 (*^__^*)", item.sandbox.boxName]];
     }
     [self openFinderWithFilePath:path];
     
-}
-
-- (NSString *)getDataDictPathWithFileName:(NSString *)fileName{
-    return [fileName stringByAppendingPathComponent:@".com.apple.mobile_container_manager.metadata.plist"];
-}
-
-- (NSDictionary *)getDataDictWithFileName:(NSString *)fileName{
-    return [NSDictionary dictionaryWithContentsOfFile:[self getDataDictPathWithFileName:fileName]];
 }
 
 #pragma mark - Open Finder
@@ -336,123 +275,42 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     system(str);
 }
 
-#pragma mark - get Simulator List Path.
-- (NSString *)getDevicePath:(ZLSandBox *)sandbox{
+#pragma mark - 监听文本改变
+- (void)addObserverFileChange{
     
-    if(![self.fileManager fileExistsAtPath:self.homePath]){
-        return nil;
-    }
-    
-    NSArray *files = [self.fileManager contentsOfDirectoryAtPath:self.homePath error:nil];
-    
-    NSString *ApplicationPath = nil;
-    
-    for (NSString *filesPath in files) {
-        NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
-
-        ApplicationPath = [self getDataPath:filesPath];
-        NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
+    for (ZLSandBox *sandbox in self.items) {
+        NSString *path = [ZLItemDatas getDevicePath:sandbox];
         
-        if (dict.allKeys.count) {
-            NSRange range = [[dict valueForKey:@"UDID"] rangeOfString:sandbox.udid];
-            
-            if (range.location != NSNotFound) {
-                
-                if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                    ApplicationPath = [self getDataApplicationPath:filesPath];
-                    
-                    if (![self.fileManager fileExistsAtPath:ApplicationPath]) {
-                        return nil;
-                    }
-                }
-                
-                if (!ApplicationPath.length) {
-                    ApplicationPath = [self getDataApplicationPath:filesPath];
-                }
-                return ApplicationPath;
-            }
+        if (path == nil) {
+            continue;
         }
-    }
-    
-    return ApplicationPath;
-}
-
-- (NSString *)getDataPath:(NSString *)filePath{
-    return [[[[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Containers"] stringByAppendingPathComponent:@"Data"] stringByAppendingPathComponent:@"Application"];
-}
-
-- (NSString *)getDataApplicationPath:(NSString *)filePath{
-   return [[[self.homePath stringByAppendingPathComponent:filePath] stringByAppendingPathComponent:@"data"] stringByAppendingPathComponent:@"Applications"];
-}
-
-- (NSString *)getBundleImagePathWithFilePath:(NSString *)filePath{
-    
-    NSString *containersPath = [[[filePath stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-    
-    NSString *bundleApplicationPath = [[containersPath stringByAppendingPathComponent:@"Bundle"] stringByAppendingPathComponent:@"Application"];
-    
-    NSDictionary *dataDict = [self getDataDictWithFileName:filePath];
-    NSString *dataName = [self getAppName:dataDict[MCMMetadataIdentifier]];
-    
-    NSArray *applicationPaths = [self.fileManager contentsOfDirectoryAtPath:bundleApplicationPath error:nil];
-    for (NSString *applicationPath in applicationPaths) {
-        NSDictionary *dict = [self getDataDictWithFileName:[bundleApplicationPath stringByAppendingPathComponent:applicationPath]];
-        NSString *appDictPath = [self getAppName:dict[MCMMetadataIdentifier]];
-        if ([dataName isEqualToString:appDictPath]) {
-            
-            NSString *appPath = [bundleApplicationPath stringByAppendingPathComponent:applicationPath];
-            NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
-            NSString *appName = nil;
-            for (NSString *pathName in paths) {
-                if ([[pathName pathExtension] isEqualToString:@"app"]) {
-                    appName = pathName;
-                    break;
-                }
-            }
-            
-            if (appName) {
-                NSArray *resources = [self.fileManager contentsOfDirectoryAtPath:[appPath stringByAppendingPathComponent:appName] error:nil];
-                
-                for (NSString *resource in resources) {
-                    NSRange range = [resource rangeOfString:@"AppIcon"];
-                    if (range.location != NSNotFound) {
-                        return [[appPath stringByAppendingPathComponent:appName] stringByAppendingPathComponent:resource];
-                    }
-                }
-                
-            }
-        }
-    }
-    return nil;
-}
-
-- (NSString *)getAppName:(NSString *)identifierName{
-    NSArray *array = [identifierName componentsSeparatedByString:@"."];
-    NSString *projectName = [array lastObject];
-    projectName = [projectName stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
-    return projectName;
-}
-
-#pragma mark - load all device plist info.
-- (NSArray *)getDeviceInfoPlists{
-    NSMutableArray *plists = [NSMutableArray array];
-    if([self.fileManager fileExistsAtPath:self.homePath]){
-        NSArray *files = [self.fileManager contentsOfDirectoryAtPath:self.homePath error:nil];
         
-        for (NSString *filesPath in files) {
-            
-            NSString *devicePath =  [[self.homePath stringByAppendingPathComponent:filesPath] stringByAppendingPathComponent:DevicePlist];
-            if (![self.fileManager fileExistsAtPath:devicePath]) {
-                continue;
-            }
-            
-            NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
-            if (dict.allKeys.count) {
-                [plists addObject:dict];
-            }
+        NSURL *directoryURL = [NSURL fileURLWithPath:path]; // assume this is set to a directory
+        int const fd = open([[directoryURL path] fileSystemRepresentation], O_EVTONLY);
+        if (fd < 0) {
+            char buffer[80];
+            strerror_r(errno, buffer, sizeof(buffer));
+            NSLog(@"Unable to open \"%@\": %s (%d)", [directoryURL path], buffer, errno);
+            return;
         }
+        dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, fd,
+                                                          DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
+        
+        dispatch_source_set_event_handler(source, ^(){
+            unsigned long const data = dispatch_source_get_data(source);
+            // 当文件改变了就去刷新Items
+            if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
+                sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
+                [self applicationDidFinishLaunching:[[NSNotification alloc] initWithName:ZLChangeSandboxRefreshItems object:nil userInfo:nil]];
+            }
+            
+        });
+        dispatch_source_set_cancel_handler(source, ^(){
+            close(fd);
+        });
+        dispatch_resume(source);
     }
-    return plists;
+    
 }
 
 #pragma mark - alert Message with text
