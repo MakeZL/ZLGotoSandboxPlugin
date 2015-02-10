@@ -107,16 +107,19 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
     
+    NSInteger index = -1;
     if ([noti.name isEqualToString:NSApplicationDidFinishLaunchingNotification]) {
         // 第一次监听文件改变
         [self addObserverFileChange];
-        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
     }else if ([noti.name isEqualToString:ZLChangeSandboxRefreshItems]){
+        index = 0;
         for (NSMenuItem *item in [[AppMenuItem submenu] itemArray]) {
             if ([item.title isEqualToString:MenuTitle]) {
+                [[AppMenuItem submenu] removeItemAtIndex:index-1];
                 [[AppMenuItem submenu] removeItem:item];
                 break;
             }
+            index++;
         }
     }
     
@@ -129,6 +132,8 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         startSubMenu  = [[NSMenu alloc] init];
         startMenuItem.submenu = startSubMenu;
         [startMenuItem setKeyEquivalentModifierMask:NSAlternateKeyMask];
+        
+        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         [[AppMenuItem submenu] addItem:startMenuItem];
     }else{
         // 如果切换了项目/Xcode,就从列表取,不需要再次创建,节省内存
