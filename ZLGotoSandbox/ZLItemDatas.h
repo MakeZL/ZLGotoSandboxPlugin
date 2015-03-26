@@ -37,6 +37,11 @@
 + (NSString *)getAppName:(NSString *)identifierName;
 
 /**
+ *  根据App的名字与sandbox，获取具体的位置
+ */
++ (NSString *)getAppName:(NSString *)appName withSandbox:(ZLSandBox *)sandbox;
+
+/**
  *  获取沙盒的根路径
  */
 + (NSString *)getHomePath;

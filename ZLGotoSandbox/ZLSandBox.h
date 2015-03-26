@@ -11,6 +11,7 @@
 
 @interface ZLSandBox : NSObject
 
+// uuid
 @property (copy,nonatomic) NSString *udid;
 // 版本
 @property (copy,nonatomic) NSString *version;

@@ -14,8 +14,10 @@
 
 @property (strong,nonatomic) NSArray *items;
 @property (copy,nonatomic) NSString *path;
-@property (strong,nonatomic) ZLSandBox *editSandbox;
 @property (strong,nonatomic) NSMutableArray *sources;
+@property (assign,nonatomic) NSInteger currentIndex;
+@property (copy,nonatomic) NSString *currentPath;
+
 @end
 
 @implementation ZLGotoSandbox
@@ -131,8 +133,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         
         startSubMenu  = [[NSMenu alloc] init];
         startMenuItem.submenu = startSubMenu;
-        [startMenuItem setKeyEquivalentModifierMask:NSAlternateKeyMask];
-        
+
         [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         [[AppMenuItem submenu] addItem:startMenuItem];
     }else{
@@ -145,11 +146,16 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             }
         }
     }
-
+    
+    [startMenuItem setKeyEquivalentModifierMask: NSShiftKeyMask | NSCommandKeyMask];
+    [startMenuItem setKeyEquivalent:@"w"];
+    startMenuItem.target = self;
+    startMenuItem.action = @selector(goNowCurrentSandbox:);
+    
     for (NSInteger i = 0; i < self.items.count; i++) {
         ZLSandBox *sandbox = [self.items objectAtIndex:i];
-        NSInteger pathIndex = 0;
         NSMenu *versionSubMenu = nil;
+        NSInteger index = 0;
         if (noti) {
             versionSubMenu = [[NSMenu alloc] init];
         }else{
@@ -158,7 +164,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     
         for (NSInteger j = 0; j < sandbox.items.count; j++) {
             if (self.path.length && [sandbox.items[j] isEqualToString:self.path]){
-                pathIndex = j;
+                index = j;
             }
             if (noti){
                 NSString *imagePath = [ZLItemDatas getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[j]];
@@ -188,7 +194,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             }
         }else{
             
-            if ((self.path.length && [sandbox.items[pathIndex] rangeOfString:self.path].location != NSNotFound )) {
+            if ((self.path.length && [sandbox.items[index] rangeOfString:self.path].location != NSNotFound )) {
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
                 
                 NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
@@ -201,7 +207,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
                     [versionSubMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
                     
-                    NSString *imagePath = [ZLItemDatas getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[pathIndex]];
+                    NSString *imagePath = [ZLItemDatas getBundleImagePathWithFilePath:sandbox.projectSandBoxPath[index]];
                     NSData *data = [NSData dataWithContentsOfFile:imagePath];
                     NSImage *image = [[NSImage alloc] initWithData:data];
                     [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
@@ -209,9 +215,9 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                 }
                 
                 if (versionSubMenuItem.tag == 101) {
-                    versionSubMenuItem.index = pathIndex;
+                    versionSubMenuItem.index = index;
                     versionSubMenuItem.sandbox = sandbox;
-                    versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[pathIndex]];
+                    versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[index]];
                 }
                 
                 
@@ -239,6 +245,15 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             [startSubMenu addItem:versionMenuItem];
         }
     }
+}
+
+#pragma mark - 跳转到当前沙盒
+- (void)goNowCurrentSandbox:(ZLMenuItem *)item{
+    
+    [self showMessageText:@"MakeZL温馨提示：只有在你运行 >iOS8.0 模拟器的时候，才会跳转到沙盒。"];
+    
+    if (!self.currentPath.length) return;
+    [self openFinderWithFilePath:self.currentPath];
 }
 
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
@@ -283,9 +298,11 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 #pragma mark - 监听文本改变
 - (void)addObserverFileChange{
     
-    for (ZLSandBox *sandbox in self.items) {
-        NSString *path = [ZLItemDatas getDevicePath:sandbox];
+    NSUInteger count = self.items.count;
+    for (NSInteger i = 0;i < count; i++) {
         
+        ZLSandBox *sandbox = self.items[i];
+        NSString *path = [ZLItemDatas getDevicePath:sandbox];
         if (path == nil) {
             continue;
         }
@@ -299,11 +316,16 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             return;
         }
         dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, fd,
-                                                          DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
+                                                          DISPATCH_VNODE_EXTEND | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
         
         dispatch_source_set_event_handler(source, ^(){
             unsigned long const data = dispatch_source_get_data(source);
+            
             // 当文件改变了就去刷新Items
+            if (data & DISPATCH_VNODE_EXTEND || data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
+                self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
+            }
+            
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
                 [self applicationDidFinishLaunching:[[NSNotification alloc] initWithName:ZLChangeSandboxRefreshItems object:nil userInfo:nil]];

@@ -237,6 +237,47 @@ static NSString *_homePath = nil;
     return [fileName stringByAppendingPathComponent:@".com.apple.mobile_container_manager.metadata.plist"];
 }
 
+/**
+ *  根据App的名字与sandbox，获取具体的位置
+ */
++ (NSString *)getAppName:(NSString *)appName withSandbox:(ZLSandBox *)sandbox{
+    NSString *path = [self getDevicePath:sandbox];
+    
+    NSArray *files = [[self fileManager] contentsOfDirectoryAtPath:path error:nil];
+    NSString *fileName = nil;
+    
+    for (NSString *filePath in files) {
+        NSDictionary *dataDict = [self getDataDictWithFileName:[path stringByAppendingPathComponent:filePath]];
+        NSString *dataName = [self getAppName:dataDict[MCMMetadataIdentifier]];
+        
+        if (!dataName) {
+            // iOS7 的沙盒bundle路径
+            NSString *appPath = path;
+            NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
+            NSString *otherAppName = nil;
+            for (NSString *pathName in paths) {
+                if ([[pathName pathExtension] isEqualToString:@"app"]) {
+                    otherAppName = pathName;
+                    break;
+                }
+            }
+            
+            NSLog(@"ZL : %@",otherAppName);
+            if (otherAppName.length){
+                if ([appName rangeOfString:otherAppName].location != NSNotFound) {
+                    return [path stringByAppendingPathComponent:filePath];
+                }
+            }
+        }
+        
+        if ([dataName isEqualToString:appName]) {
+            return [path stringByAppendingPathComponent:filePath];
+        }
+    }
+    
+    return fileName;
+}
+
 + (NSString *)getAppName:(NSString *)identifierName{
     NSArray *array = [identifierName componentsSeparatedByString:@"."];
     NSString *projectName = [array lastObject];
