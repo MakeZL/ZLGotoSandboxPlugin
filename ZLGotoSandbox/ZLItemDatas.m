@@ -254,18 +254,16 @@ static NSString *_homePath = nil;
             // iOS7 的沙盒bundle路径
             NSString *appPath = path;
             NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
-            NSString *otherAppName = nil;
+
             for (NSString *pathName in paths) {
-                if ([[pathName pathExtension] isEqualToString:@"app"]) {
-                    otherAppName = pathName;
-                    break;
-                }
-            }
-            
-            NSLog(@"ZL : %@",otherAppName);
-            if (otherAppName.length){
-                if ([appName rangeOfString:otherAppName].location != NSNotFound) {
-                    return [path stringByAppendingPathComponent:filePath];
+                NSArray *ios7FilePathDicts = [[self fileManager] contentsOfDirectoryAtPath:[appPath stringByAppendingPathComponent:pathName] error:nil];
+
+                for (NSString *filePath in ios7FilePathDicts) {
+                    if ([[filePath pathExtension] isEqualToString:@"app"]) {
+                        if ([appName isEqualToString:[filePath stringByDeletingPathExtension]]) {
+                            return [path stringByAppendingPathComponent:pathName];
+                        }
+                    }
                 }
             }
         }

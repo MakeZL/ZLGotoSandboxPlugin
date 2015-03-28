@@ -250,7 +250,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 #pragma mark - 跳转到当前沙盒
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:@"MakeZL温馨提示：只有在你运行 >iOS8.0 模拟器的时候，才会跳转到沙盒。"];
+        [self showMessageText:@"MakeZL温馨提示：只有在你运行应用的时候，才会跳转到沙盒。"];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
@@ -294,7 +294,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     system(str);
 }
 
-#pragma mark - 监听文本改变
+#pragma mark - addObserverFileChange
 - (void)addObserverFileChange{
     
     NSUInteger count = self.items.count;
@@ -314,16 +314,15 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             NSLog(@"Unable to open \"%@\": %s (%d)", [directoryURL path], buffer, errno);
             return;
         }
+        
         dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, fd,
-                                                          DISPATCH_VNODE_EXTEND | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
+                                                          DISPATCH_VNODE_ATTRIB | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
         
         dispatch_source_set_event_handler(source, ^(){
             unsigned long const data = dispatch_source_get_data(source);
             
-            // 当文件改变了就去刷新Items
-            if (data & DISPATCH_VNODE_EXTEND || data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
-                self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
-            }
+            // 监听到改变了就去刷新Items
+            self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
             
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
