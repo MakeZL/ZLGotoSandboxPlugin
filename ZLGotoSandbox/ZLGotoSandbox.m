@@ -250,7 +250,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 #pragma mark - 跳转到当前沙盒
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:@"MakeZL温馨提示：只有在你运行应用的时候，才会跳转到沙盒。"];
+        [self showMessageText:@"MakeZL温馨提示：运行应用的时候，才会跳转到沙盒。中文的话是不行的哦~"];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
