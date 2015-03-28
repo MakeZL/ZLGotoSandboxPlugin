@@ -65,11 +65,17 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 }
 
 - (void)addNotification{
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(test:) name:nil object:nil];
+
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+//
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
+//    
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
+}
+
+- (void)test:(NSNotification *)noti{
+    NSLog(@" --- %@ , %@",noti, noti.object);
 }
 
 - (void)applicationDidAddNowCurrentProjectName:(NSNotification *)noti{
