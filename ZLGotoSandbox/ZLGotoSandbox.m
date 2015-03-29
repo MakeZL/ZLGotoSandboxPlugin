@@ -66,9 +66,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 - (void)addNotification{
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
-
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
 }
 
@@ -92,7 +90,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             
             NSRange range = [path rangeOfString:@"”"];
             path = [path substringToIndex:range.location];
-            
                 if (![self.path isEqualToString:path] || !self.path.length) {
                     self.path = path;
                     [self applicationDidFinishLaunching:nil];
@@ -104,7 +101,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - initMenu
 - (void)applicationDidFinishLaunching:(NSNotification *)noti{
-    
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
@@ -159,7 +155,9 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         if (noti) {
             versionSubMenu = [[NSMenu alloc] init];
         }else{
-            versionSubMenu = [[startSubMenu itemAtIndex:i] submenu];
+            if (i < [startSubMenu itemArray].count){
+                versionSubMenu = [[startSubMenu itemAtIndex:i] submenu];
+            }
         }
     
         for (NSInteger j = 0; j < sandbox.items.count; j++) {

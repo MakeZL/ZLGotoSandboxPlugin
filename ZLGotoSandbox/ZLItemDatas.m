@@ -260,6 +260,7 @@ static NSString *_homePath = nil;
 
                 for (NSString *filePath in ios7FilePathDicts) {
                     if ([[filePath pathExtension] isEqualToString:@"app"]) {
+                        
                         if ([appName isEqualToString:[filePath stringByDeletingPathExtension]]) {
                             return [path stringByAppendingPathComponent:pathName];
                         }
@@ -267,8 +268,19 @@ static NSString *_homePath = nil;
                 }
             }
         }
+
+        NSMutableString *appStrM = [NSMutableString string];
+        for (NSInteger i = 0; i < appName.length; i++) {
+            NSString *singleName = [appName substringWithRange:NSMakeRange(i, 1)];
+            
+            if ([self IsChinese:singleName]){
+                [appStrM appendString:@"_"];
+            }else{
+                [appStrM appendString:singleName];
+            }
+        }
         
-        if ([dataName isEqualToString:appName]) {
+        if ([dataName isEqualToString:appStrM]) {
             return [path stringByAppendingPathComponent:filePath];
         }
     }
@@ -276,6 +288,16 @@ static NSString *_homePath = nil;
     return fileName;
 }
 
++ (BOOL)IsChinese:(NSString *)str {
+    for(int i= 0; i< [str length]; i++) {
+        int a = [str characterAtIndex:i];
+        if( a > 0x4e00 && a < 0x9fff)
+        {
+            return YES;
+        }
+    }
+    return NO;
+}
 + (NSString *)getAppName:(NSString *)identifierName{
     NSArray *array = [identifierName componentsSeparatedByString:@"."];
     NSString *projectName = [array lastObject];
