@@ -45,7 +45,7 @@ static NSString *_homePath = nil;
         NSString *version = [[[dict valueForKeyPath:@"runtime"]   componentsSeparatedByString:@"."] lastObject] ;
         NSString *device = [dict valueForKeyPath:@"name"];
         
-        NSString *boxName = [NSString stringWithFormat:@"%@ (%@)",device, version];
+        NSString *boxName = [NSString stringWithFormat:@"%@ > (%@)",device, version];
         
         ZLSandBox *box = [[ZLSandBox alloc] init];
         box.udid = dict[@"UDID"];

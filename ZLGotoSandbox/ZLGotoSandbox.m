@@ -31,7 +31,10 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 #pragma mark - lazy getter datas.
 - (NSArray *)items{
     if (!_items) {
-        self.items = [ZLItemDatas getAllItems];
+        NSArray *items = [ZLItemDatas getAllItems];
+        self.items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
+            return [obj1.version compare:obj2.version];
+        }];
     }
     return _items;
 }
