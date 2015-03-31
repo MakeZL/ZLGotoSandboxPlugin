@@ -32,9 +32,20 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 - (NSArray *)items{
     if (!_items) {
         NSArray *items = [ZLItemDatas getAllItems];
-        self.items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
+        
+        items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
             return [obj1.version compare:obj2.version];
         }];
+        
+        self.items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
+            if ([obj1.device compare:obj2.device] == NSOrderedAscending){
+                return NSOrderedDescending;
+            }else{
+                return NSOrderedAscending;                
+            }
+        }];
+        
+        items = nil;
     }
     return _items;
 }
