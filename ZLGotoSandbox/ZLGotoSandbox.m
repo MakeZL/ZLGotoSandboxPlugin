@@ -81,9 +81,25 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 - (void)addNotification{
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationUnderMouseProjectName:) name:@"DVTSourceExpressionUnderMouseDidChangeNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
 }
 
+#pragma mark - addObserver change xcode project.
+#pragma mark change window.
+- (void)applicationUnderMouseProjectName:(NSNotification *)noti{
+    NSMutableArray *paths = [NSMutableArray arrayWithArray:[[noti.object description] componentsSeparatedByString:@"/"]];
+    NSString *workspacePath = nil;
+    if (paths.count) {
+        [paths removeLastObject];
+        workspacePath = [[paths lastObject] stringByDeletingPathExtension];
+    }
+    if (workspacePath.length) {
+        self.path = [workspacePath stringByDeletingPathExtension];
+    }
+}
+
+#pragma mark change add Xcode project.
 - (void)applicationDidAddNowCurrentProjectName:(NSNotification *)noti{
     NSRange range = [[noti.object description] rangeOfString:@"> "];
     NSString *path = [[noti.object description] substringFromIndex:range.location + range.length];
@@ -93,7 +109,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     }
 }
 
-#pragma mark - addObserver change xcode project.
+#pragma mark change item.
 - (void)applicationDidAddCurrentMenu:(NSNotification *)noti{
     NSMenu *menu = noti.object;
     if ([menu.title isEqualToString:@"File"]) {
@@ -262,13 +278,12 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 #pragma mark - 跳转到当前沙盒
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:@"MakeZL温馨提示：运行应用的时候，才会跳转到沙盒。中文的话是不行的哦~"];
+        [self showMessageText:@"MakeZL温馨提示：运行应用的时候,才会跳转到沙盒,中文的话可能是不行的哦~ (去菜单栏File -> go to sandbox)"];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
 
 - (void)gotoProjectSandBox:(ZLMenuItem *)item{
-    
     NSString *path = item.sandbox.projectSandBoxPath[item.index];
     [self openFinderWithFilePath:path];
 }
@@ -335,7 +350,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             
             // 监听到改变了就去刷新Items
             self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
-            
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
                 [self applicationDidFinishLaunching:[[NSNotification alloc] initWithName:ZLChangeSandboxRefreshItems object:nil userInfo:nil]];

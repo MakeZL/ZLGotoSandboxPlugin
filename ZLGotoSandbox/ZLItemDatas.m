@@ -280,6 +280,7 @@ static NSString *_homePath = nil;
             }
         }
         
+        NSLog(@"ZLPath dataName : %@",dataName);
         if ([dataName isEqualToString:appStrM]) {
             return [path stringByAppendingPathComponent:filePath];
         }
