@@ -82,6 +82,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddCurrentMenu:) name:NSMenuDidChangeItemNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationUnderMouseProjectName:) name:@"DVTSourceExpressionUnderMouseDidChangeNotification" object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidAddNowCurrentProjectName:) name:@"IDEIndexDidChangeStateNotification" object:nil];
 }
 
@@ -94,8 +95,10 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         [paths removeLastObject];
         workspacePath = [[paths lastObject] stringByDeletingPathExtension];
     }
-    if (workspacePath.length) {
+    
+    if (![self.path isEqualToString:workspacePath] && workspacePath.length) {
         self.path = [workspacePath stringByDeletingPathExtension];
+        [self applicationDidFinishLaunching:nil];
     }
 }
 
