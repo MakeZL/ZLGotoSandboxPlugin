@@ -1,11 +1,11 @@
 ZLGotoSandboxPlugin-Xcode
 ------------
 
-这是一款快速跳转Xcode沙盒的插件，能够时时监听模拟器改变/Xcode改变
+You can quickly enter the iOS simulator Xcode plugin!
 -----
-#### 快捷键 'Shift + Common + w' (当模拟器运行应用的时候有效,中文不支持快速跳转)
-#### 运行完程序后需要重启下Xcode
+#### Support When running the simulator shortcut keys ('Shift + Common + w') Jump Sandbox. 
+#### Run , Restart XCode (common+Q or exit XCode.) 
 
 ![image](https://github.com/MakeZL/ZLGotoSandboxPlugin/blob/master/1.png)
-#
+
 ![image](https://github.com/MakeZL/ZLGotoSandboxPlugin/blob/master/screenshot1.png)
