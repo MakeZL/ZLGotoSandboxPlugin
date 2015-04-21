@@ -1,5 +1,5 @@
 //  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
-//  Author: @qq <120886865> @weibo <weibo.com/makezl>
+//  Author: @email <120886865@qq.com> @weibo <weibo.com/makezl>
 //
 //  ZLItemDatas.h
 //  ZLGotoSandbox
