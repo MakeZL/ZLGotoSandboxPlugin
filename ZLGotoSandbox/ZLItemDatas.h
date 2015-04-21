@@ -1,3 +1,5 @@
+//  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
+//  Author: @qq <120886865> @weibo <weibo.com/makezl>
 //
 //  ZLItemDatas.h
 //  ZLGotoSandbox
@@ -11,38 +13,36 @@
 
 @interface ZLItemDatas : NSObject
 
-/**
- *  获取所有的Item
- */
-+ (NSArray *)getAllItems;
 
++ (NSArray *)getAllItems;
 /**
- *  根据sandbox获取sandbox底下所有的Items
+ *  According to the sandbox to get the sandbox under all Items
  */
 + (NSArray *)projectsWithBox:(ZLSandBox *)sandbox;
 
 /**
- *  根据sandbox获取路径
+ *  According to the sandbox access path
  */
 + (NSString *)getDevicePath:(ZLSandBox *)sandbox;
 
 /**
- *  根据filePath获取App图标路径
+ *  According to the filePath App icon path
  */
 + (NSString *)getBundleImagePathWithFilePath:(NSString *)filePath;
 
 /**
- *  根据identifierName获取App的名字
+ *  According to the identifierName App name
  */
 + (NSString *)getAppName:(NSString *)identifierName;
 
 /**
- *  根据App的名字与sandbox，获取具体的位置
+ *  Under the name of App and sandbox,
+    to obtain the specific path
  */
 + (NSString *)getAppName:(NSString *)appName withSandbox:(ZLSandBox *)sandbox;
 
 /**
- *  获取沙盒的根路径
+ *  Get Sandbox Home Path.
  */
 + (NSString *)getHomePath;
 @end

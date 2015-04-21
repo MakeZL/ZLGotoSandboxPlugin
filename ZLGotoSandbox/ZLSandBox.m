@@ -1,3 +1,5 @@
+//  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
+//  Author: @qq <120886865> @weibo <weibo.com/makezl>
 //
 //  ZLSandBox.m
 //  ZLGotoSandbox
@@ -9,10 +11,6 @@
 #import "ZLSandBox.h"
 
 @implementation ZLSandBox
-
-- (void)setItems:(NSArray *)items{
-    _items = items;
-}
 
 @end
 

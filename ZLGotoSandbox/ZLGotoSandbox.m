@@ -1,4 +1,6 @@
-//
+//  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
+//  Author: @qq <120886865> @weibo <weibo.com/makezl>
+// 
 //  ZLGotoSandbox.m
 //  ZLGotoSandbox
 //
@@ -11,50 +13,39 @@
 #import "ZLItemDatas.h"
 
 @interface ZLGotoSandbox ()
-
+// leave in Simpulator items;
 @property (strong,nonatomic) NSArray *items;
+// current `Project` path
 @property (copy,nonatomic) NSString *path;
-@property (strong,nonatomic) NSMutableArray *sources;
-@property (assign,nonatomic) NSInteger currentIndex;
+// `shortcut keys` Jump need.
 @property (copy,nonatomic) NSString *currentPath;
-
 @end
 
 @implementation ZLGotoSandbox
 
 static NSString * ZLChangeSandboxRefreshItems = @"ZLChangeSandboxRefreshItems";
 static NSString * MenuTitle = @"Go to Sandbox!";
-static NSString * PrefixMenuTitle = @"当前项目 - ";
+static NSString * PrefixMenuTitle = @"NowApp - ";
 static NSString * PrefixFile = @"Add Files to “";
 static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - lazy getter datas.
 - (NSArray *)items{
     if (!_items) {
-        NSArray *items = [ZLItemDatas getAllItems];
-        
-        items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
+        self.items = [[ZLItemDatas getAllItems] sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
             return [obj1.version compare:obj2.version];
         }];
         
-        self.items = [items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
+        // sort
+        self.items = [self.items sortedArrayUsingComparator:^NSComparisonResult(ZLSandBox *obj1, ZLSandBox *obj2) {
             if ([obj1.device compare:obj2.device] == NSOrderedAscending){
                 return NSOrderedDescending;
             }else{
                 return NSOrderedAscending;                
             }
         }];
-        
-        items = nil;
     }
     return _items;
-}
-
-- (NSMutableArray *)sources{
-    if (!_sources) {
-        _sources = [NSMutableArray array];
-    }
-    return _sources;
 }
 
 #pragma mark - init
@@ -140,7 +131,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     
     NSInteger index = -1;
     if ([noti.name isEqualToString:NSApplicationDidFinishLaunchingNotification]) {
-        // 第一次监听文件改变
         [self addObserverFileChange];
     }else if ([noti.name isEqualToString:ZLChangeSandboxRefreshItems]){
         index = 0;
@@ -154,7 +144,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         }
     }
     
-    // 如果没有切换过项目/Xcode
+    // No change XCode.
     if (noti) {
         startMenuItem = [[NSMenuItem alloc] init];
         startMenuItem.title = MenuTitle;
@@ -166,7 +156,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         [[AppMenuItem submenu] addItem:startMenuItem];
     }else{
-        // 如果切换了项目/Xcode,就从列表取,不需要再次创建,节省内存
+        // Change XCode , `Recycling` items.
         for (NSMenuItem *item in [[AppMenuItem submenu] itemArray]) {
             if ([item.title isEqualToString:MenuTitle]) {
                 startMenuItem = item;
@@ -176,12 +166,12 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         }
     }
     
-    [startMenuItem setKeyEquivalentModifierMask: NSShiftKeyMask | NSCommandKeyMask];
-    [startMenuItem setKeyEquivalent:@"w"];
-    startMenuItem.target = self;
-    startMenuItem.action = @selector(goNowCurrentSandbox:);
+    // Add ShortcutKey
+    [self addShortcutKeysWithItem:startMenuItem];
     
-    for (NSInteger i = 0; i < self.items.count; i++) {
+    NSUInteger itemCount = self.items.count;
+    
+    for (NSInteger i = 0; i < itemCount; i++) {
         ZLSandBox *sandbox = [self.items objectAtIndex:i];
         NSMenu *versionSubMenu = nil;
         NSInteger index = 0;
@@ -220,7 +210,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             if (noti) {
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
                 versionSubMenuItem.state = NSOffState;
-                versionSubMenuItem.title = @"您没有运行程序到这个模拟器.";
+                versionSubMenuItem.title = @"No run Application In the simulator.";
                 [versionSubMenu addItem:versionSubMenuItem];
             }
         }else{
@@ -256,7 +246,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                 versionSubMenuItem.attributedTitle = attr;
 
             }else{
-                // 清空
+                // clear Items
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
                 if (versionSubMenuItem.tag == 101) {
                     [versionSubMenu removeItem:versionSubMenuItem];
@@ -270,7 +260,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             versionMenuItem.sandbox = sandbox;
             versionMenuItem.title = [self.items[i] boxName];
             versionMenuItem.submenu = versionSubMenu;
-            
             [versionMenuItem setTarget:self];
             [versionMenuItem setAction:@selector(gotoSandBox:)];
             [startSubMenu addItem:versionMenuItem];
@@ -278,10 +267,17 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     }
 }
 
-#pragma mark - 跳转到当前沙盒
+- (void)addShortcutKeysWithItem:(NSMenuItem *)startMenuItem{
+    [startMenuItem setKeyEquivalentModifierMask: NSShiftKeyMask | NSCommandKeyMask];
+    [startMenuItem setKeyEquivalent:@"w"];
+    startMenuItem.target = self;
+    startMenuItem.action = @selector(goNowCurrentSandbox:);
+}
+
+#pragma mark - Jump Current Sandbox.
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:@"MakeZL温馨提示：运行应用的时候,才会跳转到沙盒,中文的话可能是不行的哦~ (去菜单栏File -> go to sandbox)"];
+        [self showMessageText:@"MakeZL: In the Run Simulation. iOS8 No support Chinese. (You look >> File -> go to sandbox)"];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
@@ -293,24 +289,15 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - go to sandbox list.
 - (void)gotoSandBox:(ZLMenuItem *)item{
+    if (!item.title.length) return ;
     
-    if (!item.title.length) {
-        return ;
-    }
-    
-    // Note:
-    // 1.获取版本号
-    // 2.查看文件夹底下是否有device.plist文件
-    // 3.Device.plist (找到runtime的字段) rangeOfString 查看是否有相应的信息 。
-    // 4.如果有就跳转到，当前文件夹底下的 data/Containers/Data/Application
     NSString *path = [ZLItemDatas getDevicePath:item.sandbox];
     // open Finder
     if (!path.length) {
         path = [ZLItemDatas getHomePath];
-        [self showMessageText:[NSString stringWithFormat:@"%@版本的模拟器还没有任何的程序\n给您跳转到根目录 (*^__^*)", item.sandbox.boxName]];
+        [self showMessageText:[NSString stringWithFormat:@"%@ Simualtor no Apps . Give you a Jump to root Directory. (*^__^*)", item.sandbox.boxName]];
     }
     [self openFinderWithFilePath:path];
-    
 }
 
 #pragma mark - Open Finder
@@ -318,7 +305,6 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     if (!path.length) {
         return ;
     }
-    
     NSString *open = [NSString stringWithFormat:@"open %@",path];
     const char *str = [open UTF8String];
     system(str);
@@ -326,16 +312,11 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
 
 #pragma mark - addObserverFileChange
 - (void)addObserverFileChange{
-    
     NSUInteger count = self.items.count;
     for (NSInteger i = 0;i < count; i++) {
-        
         ZLSandBox *sandbox = self.items[i];
         NSString *path = [ZLItemDatas getDevicePath:sandbox];
-        if (path == nil) {
-            continue;
-        }
-        
+        if (path == nil) continue;
         NSURL *directoryURL = [NSURL fileURLWithPath:path]; // assume this is set to a directory
         int const fd = open([[directoryURL path] fileSystemRepresentation], O_EVTONLY);
         if (fd < 0) {
@@ -346,12 +327,13 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         }
         
         dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, fd,
+                                                        DISPATCH_VNODE_LINK |
+                                                          DISPATCH_VNODE_EXTEND |
                                                           DISPATCH_VNODE_ATTRIB | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
         
         dispatch_source_set_event_handler(source, ^(){
             unsigned long const data = dispatch_source_get_data(source);
-            
-            // 监听到改变了就去刷新Items
+            // change refresh items.
             self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];

@@ -1,3 +1,5 @@
+//  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
+//  Author: @qq <120886865> @weibo <weibo.com/makezl>
 //
 //  ZLSandBox.h
 //  ZLGotoSandbox
@@ -11,25 +13,20 @@
 
 @interface ZLSandBox : NSObject
 
-// uuid
 @property (copy,nonatomic) NSString *udid;
-// 版本
 @property (copy,nonatomic) NSString *version;
-// 设备
 @property (copy,nonatomic) NSString *device;
-// 设备+版本的名字
+// device+version
 @property (copy,nonatomic) NSString *boxName;
-// 展示所有的子分类
+// contains simulator items
 @property (strong,nonatomic) NSArray *items;
-// 沙盒的路径
+// sanbox path
 @property (strong,nonatomic) NSArray *projectSandBoxPath;
-
 
 @end
 
 @interface ZLMenuItem : NSMenuItem
 
-//索引值
 @property (assign,nonatomic) NSInteger index;
 @property (strong,nonatomic) ZLSandBox *sandbox;
 

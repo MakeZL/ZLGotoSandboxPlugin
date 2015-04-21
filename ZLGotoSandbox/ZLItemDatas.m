@@ -1,3 +1,5 @@
+//  github: https://github.com/MakeZL/ZLGotoSandboxPlugin
+//  Author: @qq <120886865> @weibo <weibo.com/makezl>
 //
 //  ZLItemDatas.m
 //  ZLGotoSandbox
@@ -167,12 +169,12 @@ static NSString *_homePath = nil;
     
     NSString *bundleApplicationPath = [[containersPath stringByAppendingPathComponent:@"Bundle"] stringByAppendingPathComponent:@"Application"];
     
-    // 获取iOS8 沙盒路径
+    // Get iOS8 Sandbox Path
     NSDictionary *dataDict = [self getDataDictWithFileName:filePath];
     NSString *dataName = [self getAppName:dataDict[MCMMetadataIdentifier]];
     
     if (!dataName) {
-        // iOS7 的沙盒bundle路径
+        // Get iOS7 Sandbox BundlePath
         NSString *appPath = filePath;
         NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
         NSString *appName = nil;
@@ -238,7 +240,8 @@ static NSString *_homePath = nil;
 }
 
 /**
- *  根据App的名字与sandbox，获取具体的位置
+ *  Under the name of App and sandbox,
+    to obtain the specific path
  */
 + (NSString *)getAppName:(NSString *)appName withSandbox:(ZLSandBox *)sandbox{
     NSString *path = [self getDevicePath:sandbox];
@@ -251,7 +254,7 @@ static NSString *_homePath = nil;
         NSString *dataName = [self getAppName:dataDict[MCMMetadataIdentifier]];
         
         if (!dataName) {
-            // iOS7 的沙盒bundle路径
+            // Get iOS7 Sandbox BundlePath
             NSString *appPath = path;
             NSArray *paths = [self.fileManager contentsOfDirectoryAtPath:appPath error:nil];
 
@@ -269,10 +272,10 @@ static NSString *_homePath = nil;
             }
         }
 
+        // Chinese
         NSMutableString *appStrM = [NSMutableString string];
         for (NSInteger i = 0; i < appName.length; i++) {
             NSString *singleName = [appName substringWithRange:NSMakeRange(i, 1)];
-            
             if ([self IsChinese:singleName]){
                 [appStrM appendString:@"_"];
             }else{
@@ -280,7 +283,6 @@ static NSString *_homePath = nil;
             }
         }
         
-        NSLog(@"ZLPath dataName : %@",dataName);
         if ([dataName isEqualToString:appStrM]) {
             return [path stringByAppendingPathComponent:filePath];
         }
