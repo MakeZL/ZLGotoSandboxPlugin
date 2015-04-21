@@ -19,6 +19,8 @@
 @property (copy,nonatomic) NSString *path;
 // `shortcut keys` Jump need.
 @property (copy,nonatomic) NSString *currentPath;
+// recoder startMenuItem.
+@property (strong,nonatomic) NSMenuItem *startMenuItem;
 @end
 
 @implementation ZLGotoSandbox
@@ -27,7 +29,7 @@ static NSString * ZLChangeSandboxRefreshItems = @"ZLChangeSandboxRefreshItems";
 static NSString * MenuTitle = @"Go to Sandbox!";
 static NSString * PrefixMenuTitle = @"NowApp - ";
 static NSString * PrefixFile = @"Add Files to “";
-static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
+static NSInteger VersionSubMenuItemTag = 101;
 
 #pragma mark - lazy getter datas.
 - (NSArray *)items{
@@ -128,8 +130,8 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     NSMenuItem *AppMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
     NSMenuItem *startMenuItem = nil;
     NSMenu *startSubMenu = nil;
-    
     NSInteger index = -1;
+    
     if ([noti.name isEqualToString:NSApplicationDidFinishLaunchingNotification]) {
         [self addObserverFileChange];
     }else if ([noti.name isEqualToString:ZLChangeSandboxRefreshItems]){
@@ -166,8 +168,9 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
         }
     }
     
+    self.startMenuItem = startMenuItem;
     // Add ShortcutKey
-    [self addShortcutKeysWithItem:startMenuItem];
+    [self addStartMenuItemShortcutKeys];
     
     NSUInteger itemCount = self.items.count;
     
@@ -220,9 +223,9 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                 
                 NSString *title = [versionSubMenuItem.title stringByReplacingOccurrencesOfString:PrefixMenuTitle withString:@""];
                 
-                if (![title isEqualToString:self.path] && versionSubMenuItem.tag != 101) {
+                if (![title isEqualToString:self.path] && versionSubMenuItem.tag != VersionSubMenuItemTag) {
                     versionSubMenuItem = [[ZLMenuItem alloc] init];
-                    versionSubMenuItem.tag = 101;
+                    versionSubMenuItem.tag = VersionSubMenuItemTag;
                     [versionSubMenuItem setTarget:self];
                     [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
                     [versionSubMenu insertItem:versionSubMenuItem atIndex:0];
@@ -235,12 +238,11 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
                     versionSubMenuItem.image = image;
                 }
                 
-                if (versionSubMenuItem.tag == 101) {
+                if (versionSubMenuItem.tag == VersionSubMenuItemTag) {
                     versionSubMenuItem.index = index;
                     versionSubMenuItem.sandbox = sandbox;
                     versionSubMenuItem.title = [NSString stringWithFormat:@"%@%@",PrefixMenuTitle,sandbox.items[index]];
                 }
-                
                 
                 NSAttributedString *attr = [[NSAttributedString alloc] initWithString:versionSubMenuItem.title attributes:@{NSFontAttributeName: [NSFont userFontOfSize:16] , NSForegroundColorAttributeName:[NSColor redColor]}];
                 versionSubMenuItem.attributedTitle = attr;
@@ -248,7 +250,7 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
             }else{
                 // clear Items
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
-                if (versionSubMenuItem.tag == 101) {
+                if (versionSubMenuItem.tag == VersionSubMenuItemTag) {
                     [versionSubMenu removeItem:versionSubMenuItem];
                     [versionSubMenu removeItem:[[versionSubMenu itemArray] firstObject]];
                 }
@@ -267,11 +269,11 @@ static NSString * MCMMetadataIdentifier = @"MCMMetadataIdentifier";
     }
 }
 
-- (void)addShortcutKeysWithItem:(NSMenuItem *)startMenuItem{
-    [startMenuItem setKeyEquivalentModifierMask: NSShiftKeyMask | NSCommandKeyMask];
-    [startMenuItem setKeyEquivalent:@"w"];
-    startMenuItem.target = self;
-    startMenuItem.action = @selector(goNowCurrentSandbox:);
+- (void)addStartMenuItemShortcutKeys{
+    [self.startMenuItem setKeyEquivalentModifierMask: NSShiftKeyMask | NSCommandKeyMask];
+    [self.startMenuItem setKeyEquivalent:@"w"];
+    self.startMenuItem.target = self;
+    self.startMenuItem.action = @selector(goNowCurrentSandbox:);
 }
 
 #pragma mark - Jump Current Sandbox.
