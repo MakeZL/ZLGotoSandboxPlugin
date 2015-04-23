@@ -50,7 +50,9 @@ static NSString *_homePath = nil;
         NSString *boxName = [NSString stringWithFormat:@"%@ > (%@)",device, version];
         
         ZLSandBox *box = [[ZLSandBox alloc] init];
-        box.udid = dict[@"UDID"];
+        if ([dict valueForKeyPath:@"UDID"]) {
+            box.udid = dict[@"UDID"];
+        }
         box.boxName = boxName;
         box.version = version;
         box.device = device;
@@ -140,7 +142,7 @@ static NSString *_homePath = nil;
         NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:devicePath];
         
         if (dict.allKeys.count) {
-            NSRange range = [[dict valueForKey:@"UDID"] rangeOfString:sandbox.udid];
+            NSRange range = [[dict valueForKeyPath:@"UDID"] rangeOfString:sandbox.udid];
             
             if (range.location != NSNotFound) {
                 
