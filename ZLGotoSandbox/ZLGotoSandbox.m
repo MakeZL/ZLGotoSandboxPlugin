@@ -270,6 +270,10 @@ static NSInteger VersionSubMenuItemTag = 101;
             [versionMenuItem setAction:@selector(gotoSandBox:)];
             [startSubMenu addItem:versionMenuItem];
         }
+        
+        if (index != -1 && ([noti.name isEqualToString:ZLChangeSandboxRefreshItems])) {
+            [startSubMenu cancelTracking];
+        }
     }
 }
 
