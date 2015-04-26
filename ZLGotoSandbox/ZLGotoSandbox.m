@@ -154,9 +154,14 @@ static NSInteger VersionSubMenuItemTag = 101;
         
         startSubMenu  = [[NSMenu alloc] init];
         startMenuItem.submenu = startSubMenu;
-
-        [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
-        [[AppMenuItem submenu] addItem:startMenuItem];
+        
+        if (index != -1){
+            [[AppMenuItem submenu] insertItem:[NSMenuItem separatorItem] atIndex:index-1];
+            [[AppMenuItem submenu] insertItem:startMenuItem atIndex:index];
+        }else{
+            [[AppMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+            [[AppMenuItem submenu] addItem:startMenuItem];
+        }
     }else{
         // Change XCode , `Recycling` items.
         for (NSMenuItem *item in [[AppMenuItem submenu] itemArray]) {
@@ -185,7 +190,7 @@ static NSInteger VersionSubMenuItemTag = 101;
                 versionSubMenu = [[startSubMenu itemAtIndex:i] submenu];
             }
         }
-    
+        
         for (NSInteger j = 0; j < sandbox.items.count; j++) {
             if (self.path.length && [sandbox.items[j] isEqualToString:self.path]){
                 index = j;
@@ -197,7 +202,6 @@ static NSInteger VersionSubMenuItemTag = 101;
                 [image setSize:NSSizeFromCGSize(CGSizeMake(18, 18))];
                 
                 ZLMenuItem *versionSubMenuItem = [[ZLMenuItem alloc] init];
-
                 versionSubMenuItem.image = image;
                 versionSubMenuItem.index = j;
                 versionSubMenuItem.sandbox = sandbox;
@@ -205,7 +209,7 @@ static NSInteger VersionSubMenuItemTag = 101;
                 [versionSubMenuItem setAction:@selector(gotoProjectSandBox:)];
                 versionSubMenuItem.title = sandbox.items[j];
                 [versionSubMenu addItem:versionSubMenuItem];
-
+                
             }
         }
         
@@ -246,7 +250,7 @@ static NSInteger VersionSubMenuItemTag = 101;
                 
                 NSAttributedString *attr = [[NSAttributedString alloc] initWithString:versionSubMenuItem.title attributes:@{NSFontAttributeName: [NSFont userFontOfSize:16] , NSForegroundColorAttributeName:[NSColor greenColor]}];
                 versionSubMenuItem.attributedTitle = attr;
-
+                
             }else{
                 // clear Items
                 ZLMenuItem *versionSubMenuItem = [[versionSubMenu itemArray] firstObject];
@@ -339,7 +343,9 @@ static NSInteger VersionSubMenuItemTag = 101;
             self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
-                [self applicationDidFinishLaunching:[[NSNotification alloc] initWithName:ZLChangeSandboxRefreshItems object:nil userInfo:nil]];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self applicationDidFinishLaunching:[[NSNotification alloc] initWithName:ZLChangeSandboxRefreshItems object:nil userInfo:nil]];
+                });
             }
             
         });
@@ -348,7 +354,6 @@ static NSInteger VersionSubMenuItemTag = 101;
         });
         dispatch_resume(source);
     }
-    
 }
 
 #pragma mark - alert Message with text
