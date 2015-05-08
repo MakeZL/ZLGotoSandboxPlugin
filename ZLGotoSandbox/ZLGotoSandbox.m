@@ -360,6 +360,11 @@ static NSInteger VersionSubMenuItemTag = 101;
     }
 }
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - alert Message with text
 - (void)showMessageText:(NSString *)msgText{
     NSAlert *alert = [[NSAlert alloc] init];
