@@ -226,13 +226,13 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = "${HOME}";
+				DSTROOT = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ZLGotoSandbox",
 				);
 				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
-				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				INSTALL_PATH = "~/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = xcplugin;
@@ -244,13 +244,13 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = "${HOME}";
+				DSTROOT = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ZLGotoSandbox",
 				);
 				INFOPLIST_FILE = ZLGotoSandbox/Info.plist;
-				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				INSTALL_PATH = "~/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = xcplugin;
