@@ -287,7 +287,7 @@ static NSInteger VersionSubMenuItemTag = 101;
 #pragma mark - Jump Current Sandbox.
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:@"MakeZL: In the Run Simulation. iOS8 No support Chinese. (You look >> File -> go to sandbox)"];
+        [self showMessageText:[NSString stringWithFormat:@"%@:%@ > %@",self.currentPath,self.path,@"MakeZL: In the Run Simulation. iOS8 No support Chinese. (You look >> File -> go to sandbox)"]];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
@@ -339,11 +339,12 @@ static NSInteger VersionSubMenuItemTag = 101;
         dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, fd,
                                                         DISPATCH_VNODE_LINK |
                                                           DISPATCH_VNODE_EXTEND |
-                                                          DISPATCH_VNODE_ATTRIB | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE, DISPATCH_TARGET_QUEUE_DEFAULT);
+                                                          DISPATCH_VNODE_ATTRIB | DISPATCH_VNODE_WRITE | DISPATCH_VNODE_DELETE | DISPATCH_VNODE_RENAME | DISPATCH_VNODE_REVOKE, DISPATCH_TARGET_QUEUE_DEFAULT);
         
         dispatch_source_set_event_handler(source, ^(){
             unsigned long const data = dispatch_source_get_data(source);
             // change refresh items.
+            NSLog(@"ZLLOg %ld : %@",data,self.path);
             self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
