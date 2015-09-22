@@ -287,7 +287,7 @@ static NSInteger VersionSubMenuItemTag = 101;
 #pragma mark - Jump Current Sandbox.
 - (void)goNowCurrentSandbox:(ZLMenuItem *)item{
     if (!self.currentPath.length) {
-        [self showMessageText:[NSString stringWithFormat:@"%@:%@ > %@",self.currentPath,self.path,@"MakeZL: In the Run Simulation. iOS8 No support Chinese. (You look >> File -> go to sandbox)"]];
+        [self showMessageText:[NSString stringWithFormat:@"%@:%@ > %@",self.currentPath,self.path,@"MakeZL : In the Run Simulation. Must be App info.plist Identifier is EqualTo Project Name."]];
     }
     [self openFinderWithFilePath:self.currentPath];
 }
