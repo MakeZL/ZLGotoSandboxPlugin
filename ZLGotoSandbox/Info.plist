@@ -35,7 +35,7 @@
 	<key>XCPluginHasUI</key>
 	<false/>
 	<key>DVTPlugInCompatibilityUUIDs</key>
-		<array>
+	<array>
 		<string>FEC992CC-CA4A-4CFD-8881-77300FCB848A</string>
 		<string>C4A681B0-4A26-480E-93EC-1218098B9AA0</string>
 		<string>A2E4D43F-41F4-4FB9-BB94-7177011C9AED</string>
@@ -55,6 +55,8 @@
 		<string>7265231C-39B4-402C-89E1-16167C4CC990</string>
 		<string>9AFF134A-08DC-4096-8CEE-62A4BB123046</string>
 		<string>F41BD31E-2683-44B8-AE7F-5F09E919790E</string>
+		<string>E71C2CFE-BFD8-4044-8F06-00AE685A406C</string>
+		<string>ACA8656B-FEA8-4B6D-8E4A-93F4C95C362C</string>
 	</array>
 </dict>
 </plist>
