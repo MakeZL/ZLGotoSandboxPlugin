@@ -344,7 +344,6 @@ static NSInteger VersionSubMenuItemTag = 101;
         dispatch_source_set_event_handler(source, ^(){
             unsigned long const data = dispatch_source_get_data(source);
             // change refresh items.
-            NSLog(@"ZLLOg %ld : %@",data,self.path);
             self.currentPath = [ZLItemDatas getAppName:self.path withSandbox:sandbox];
             if (data & DISPATCH_VNODE_WRITE || data & DISPATCH_VNODE_DELETE) {
                 sandbox.items = [ZLItemDatas projectsWithBox:sandbox];
